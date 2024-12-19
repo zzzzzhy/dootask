@@ -60,10 +60,10 @@
             fullscreen>
             <ul>
                 <li v-if="localUser.uid">
-                    <MeetingPlayer :player="localUser" isLocal/>
+                    <Player :player="localUser" isLocal/>
                 </li>
                 <li v-for="user in remoteUsers">
-                    <MeetingPlayer :player="user"/>
+                    <Player :player="user"/>
                 </li>
             </ul>
             <div slot="footer" class="adaption meeting-button-group">
@@ -123,14 +123,16 @@
 
 <script>
 import {mapState} from 'vuex'
-import MeetingPlayer from "./MeetingPlayer.vue";
-import DragBallComponent from "../../../components/DragBallComponent";
-import UserSelect from "../../../components/UserSelect.vue";
-import emitter from "../../../store/events";
+import Player from "./player.vue";
+import DragBallComponent from "../../../../components/DragBallComponent";
+import UserSelect from "../../../../components/UserSelect.vue";
+import emitter from "../../../../store/events";
+import {getErrorMessage} from "./utils";
+import {getLanguage} from "../../../../language";
 
 export default {
     name: "MeetingManager",
-    components: {UserSelect, DragBallComponent, MeetingPlayer},
+    components: {UserSelect, DragBallComponent, Player},
     props: {
         id: {
             type: String,
@@ -242,7 +244,7 @@ export default {
                         this.addShow = data.show;
                         this.invitationShow = data.show;
                         this.invitationLoad = false;
-                        $A.modalError('加入会议失败');
+                        this.openModal('加入会议失败');
                         break;
                 }
             },
@@ -308,7 +310,7 @@ export default {
                 isMeeting = this.meetingShow;
             }
             if (isMeeting) {
-                $A.modalWarning("正在会议中，无法进入其他会议室");
+                this.openModal("正在会议中，无法进入其他会议室", 'warning');
                 return;
             }
 
@@ -407,7 +409,7 @@ export default {
                         // 关闭弹窗
                         this.addShow = false;
                     }).catch(({ msg }) => {
-                        $A.modalError(msg);
+                        this.openModal(msg);
                     }).finally(_ => {
                         loader(false);
                     });
@@ -418,12 +420,12 @@ export default {
                 $A.loadScript('js/AgoraRTC_N-4.17.0.js').then(_ => {
                     this.join(data)
                 }).catch(_ => {
-                    $A.modalError("会议组件加载失败！");
+                    this.openModal("会议组件加载失败！");
                 }).finally(_ => {
                     loader(false);
                 })
             }).catch(({msg}) => {
-                $A.modalError(msg);
+                this.openModal(msg);
             }).finally(_ => {
                 loader(false);
             });
@@ -458,7 +460,7 @@ export default {
                 this.invitationShow = true;
             } else if (type === 'submit') {
                 if (this.invitationData.userids.length === 0) {
-                    $A.modalWarning("请选择邀请成员");
+                    this.openModal("请选择邀请成员", 'warning');
                     return;
                 }
                 this.invitationLoad = true;
@@ -471,7 +473,7 @@ export default {
                     this.$store.dispatch("updateDialogLastMsg", data.msgs);
                     $A.messageSuccess(msg);
                 }).catch(({msg}) => {
-                    $A.modalError(msg);
+                    this.openModal(msg);
                 }).finally(_ => {
                     this.invitationLoad = false;
                 });
@@ -486,15 +488,31 @@ export default {
                     okText: '退出',
                     onOk: async _ => {
                         await this.leave()
-                        if ($A.isSubElectron) {
-                            this.$Electron.sendMessage('windowDestroy');
-                        } else if (this.addData.sharekey) {
-                            this.addShow = true;
-                        }
+                        this.onBeforeClose()
                         resolve()
                     }
                 });
             })
+        },
+
+
+        openModal(msg, type) {
+            const modal = type === 'warning' ? $A.modalWarning : $A.modalError;
+            modal({
+                content: msg,
+                onOk: async _ => {
+                    this.onBeforeClose()
+                    resolve()
+                }
+            });
+        },
+
+        onBeforeClose() {
+            if ($A.isSubElectron) {
+                this.$Electron.sendMessage('windowDestroy');
+            } else if (this.addData.sharekey) {
+                this.addShow = true;
+            }
         },
 
         linkCopy() {
@@ -513,7 +531,7 @@ export default {
                 });
                 this.invitationShow = false;
             }).catch(({ msg }) => {
-                $A.modalError(msg);
+                this.openModal(msg);
             }).finally(_ => {
                 this.linkCopyLoad = false;
             });
@@ -576,7 +594,14 @@ export default {
                     this.meetingShow = true;
                 } catch (error) {
                     console.error(error)
-                    $A.modalError("会议组件加载失败！");
+                    $A.modalError({
+                        language: false,
+                        content: getErrorMessage(error.code, getLanguage()) || this.$L("会议组件加载失败！"),
+                        onOk: async _ => {
+                            this.onBeforeClose()
+                            resolve()
+                        }
+                    });
                 }
             } catch (e) { }
             this.addShow = false;

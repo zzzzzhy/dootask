@@ -254,7 +254,7 @@ export default {
                         this.addShow = data.show;
                         this.invitationShow = data.show;
                         this.invitationLoad = false;
-                        this.openModal('加入会议失败');
+                        $A.modalError('加入会议失败');
                         break;
                 }
             },
@@ -320,7 +320,10 @@ export default {
                 isMeeting = this.meetingShow;
             }
             if (isMeeting) {
-                this.openModal("正在会议中，无法进入其他会议室", 'warning');
+                $A.modalWarning({
+                    content: "正在会议中，无法进入其他会议室",
+                    onOk: this.onBeforeClose
+                });
                 return;
             }
 
@@ -419,7 +422,10 @@ export default {
                         // 关闭弹窗
                         this.addShow = false;
                     }).catch(({ msg }) => {
-                        this.openModal(msg);
+                        $A.modalError({
+                            content: msg,
+                            onOk: this.onBeforeClose
+                        });
                     }).finally(_ => {
                         loader(false);
                     });
@@ -430,12 +436,18 @@ export default {
                 $A.loadScript('js/AgoraRTC_N-4.17.0.js').then(_ => {
                     this.join(data)
                 }).catch(_ => {
-                    this.openModal("会议组件加载失败！");
+                    $A.modalError({
+                        content: "会议组件加载失败！",
+                        onOk: this.onBeforeClose
+                    });
                 }).finally(_ => {
                     loader(false);
                 })
             }).catch(({msg}) => {
-                this.openModal(msg);
+                $A.modalError({
+                    content: msg,
+                    onOk: this.onBeforeClose
+                });
             }).finally(_ => {
                 loader(false);
             });
@@ -470,7 +482,7 @@ export default {
                 this.invitationShow = true;
             } else if (type === 'submit') {
                 if (this.invitationData.userids.length === 0) {
-                    this.openModal("请选择邀请成员", 'warning');
+                    $A.modalWarning("请选择邀请成员");
                     return;
                 }
                 this.invitationLoad = true;
@@ -483,7 +495,7 @@ export default {
                     this.$store.dispatch("updateDialogLastMsg", data.msgs);
                     $A.messageSuccess(msg);
                 }).catch(({msg}) => {
-                    this.openModal(msg);
+                    $A.modalError(msg);
                 }).finally(_ => {
                     this.invitationLoad = false;
                 });
@@ -496,18 +508,12 @@ export default {
                     content: '确定要离开会议吗？',
                     cancelText: '继续',
                     okText: '退出',
-                    onOk: this.onBeforeClose
+                    onOk: async () => {
+                        await this.onBeforeClose()
+                        resolve()
+                    }
                 });
             })
-        },
-
-
-        openModal(msg, type) {
-            const modal = type === 'warning' ? $A.modalWarning : $A.modalError;
-            modal({
-                content: msg,
-                onOk: this.onBeforeClose
-            });
         },
 
         async onBeforeClose() {
@@ -539,7 +545,7 @@ export default {
                 });
                 this.invitationShow = false;
             }).catch(({ msg }) => {
-                this.openModal(msg);
+                $A.modalError(msg);
             }).finally(_ => {
                 this.linkCopyLoad = false;
             });

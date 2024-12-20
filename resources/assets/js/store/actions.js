@@ -2908,13 +2908,24 @@ export default {
      * @returns {Promise<unknown>}
      */
     openDialog({state, dispatch}, dialog_id) {
-        return new Promise(resolve => {
+        return new Promise(async resolve => {
             let search_msg_id;
             let dialog_msg_id;
             if ($A.isJson(dialog_id)) {
                 search_msg_id = dialog_id.search_msg_id;
                 dialog_msg_id = dialog_id.dialog_msg_id;
                 dialog_id = dialog_id.dialog_id;
+            }
+            //
+            if (dialog_id > 0 && state.cacheDialogs.findIndex(item => item.id == dialog_id) === -1) {
+                dispatch("showSpinner", 300)
+                try {
+                    await dispatch("getDialogOne", dialog_id)
+                } catch (e) {
+                    console.warn(e);
+                } finally {
+                    dispatch("hiddenSpinner")
+                }
             }
             //
             requestAnimationFrame(_ => {

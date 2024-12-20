@@ -330,6 +330,9 @@ class WebSocketDialog extends AbstractModel
                 }
                 break;
         }
+        if (empty($data['pinyin'])) {
+            $data['pinyin'] = Base::cn2pinyin($data['name']);
+        }
 
         // 已存在的消息类型
         if ($hasData === true) {

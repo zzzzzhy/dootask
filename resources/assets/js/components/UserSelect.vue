@@ -368,9 +368,7 @@ export default {
             switch (switchActive) {
                 case 'recent':
                     if (searchKey) {
-                        return recents.filter(item => {
-                            return `${item.name}`.indexOf(searchKey) > -1
-                        })
+                        return recents.filter(item => $A.strExists(`${item.name} ${item.email} ${item.pinyin}`, searchKey))
                     }
                     return recents
 
@@ -517,9 +515,11 @@ export default {
                     return b.todo_num - a.todo_num;
                 }
                 return $A.dayjs(b.last_at) - $A.dayjs(a.last_at);
-            }).map(({id, name, type, group_type, avatar, dialog_user}) => {
+            }).map(({id, name, pinyin, email, type, group_type, avatar, dialog_user}) => {
                 return {
                     name,
+                    pinyin,
+                    email,
                     type,
                     group_type,
                     avatar,

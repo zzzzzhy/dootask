@@ -67,9 +67,24 @@ export default {
      */
     init({state, dispatch}) {
         return new Promise(async resolve => {
-            let action = null
+            // 语言、主题、用户信息
+            const urlParams = $A.urlParameterAll()
+            const paramMap = {
+                language: '__system:languageName__',
+                theme: '__system:themeConf__',
+                userid: '__system:userId__',
+                token: '__system:userToken__'
+            };
+            Object.entries(paramMap).forEach(([param, key]) => {
+                urlParams[param] && window.localStorage.setItem(key, urlParams[param]);
+            });
+            if (Object.keys(paramMap).some(param => urlParams[param])) {
+                const newUrl = $A.removeURLParameter(window.location.href, Object.keys(paramMap));
+                window.history.replaceState(null, '', newUrl);
+            }
 
             // 清理缓存、读取缓存
+            let action = null
             const clearCache = await $A.IDBString("clearCache")
             if (clearCache) {
                 if (clearCache === "handle") {

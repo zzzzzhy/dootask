@@ -47,16 +47,6 @@ cd dootask
 ./cmd port 80
 ```
 
-### Change App Url
-
-```bash
-# This URL only affects the email reply.
-./cmd url {Your domain url}
-
-# example:
-./cmd url https://domain.com
-```
-
 ### Stop server
 
 ```bash

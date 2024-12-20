@@ -1,5 +1,5 @@
 <template>
-    <div class="meeting-warp">
+    <div class="meeting-warp" :class="{'meeting-full': $isSubElectron}">
         <!-- 加入/新建 -->
         <Modal
             v-model="addShow"
@@ -121,6 +121,16 @@
     </div>
 </template>
 
+<style lang="scss" scoped>
+.meeting-full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+}
+</style>
 <script>
 import {mapState} from 'vuex'
 import Player from "./player.vue";
@@ -486,11 +496,7 @@ export default {
                     content: '确定要离开会议吗？',
                     cancelText: '继续',
                     okText: '退出',
-                    onOk: async _ => {
-                        await this.leave()
-                        this.onBeforeClose()
-                        resolve()
-                    }
+                    onOk: this.onBeforeClose
                 });
             })
         },
@@ -500,14 +506,16 @@ export default {
             const modal = type === 'warning' ? $A.modalWarning : $A.modalError;
             modal({
                 content: msg,
-                onOk: async _ => {
-                    this.onBeforeClose()
-                    resolve()
-                }
+                onOk: this.onBeforeClose
             });
         },
 
-        onBeforeClose() {
+        async onBeforeClose() {
+            try {
+                await this.leave()
+            } catch (e) {
+                console.error(e)
+            }
             if ($A.isSubElectron) {
                 this.$Electron.sendMessage('windowDestroy');
             } else if (this.addData.sharekey) {
@@ -580,27 +588,33 @@ export default {
                 const localTracks = [];
                 try {
                     this.localUser.uid = await this.agoraClient.join(options.appid, options.channel, options.token, options.uid)
-                    if (this.addData.tracks.includes("audio")) {
-                        localTracks.push(this.localUser.audioTrack = await AgoraRTC.createMicrophoneAudioTrack())
-                    }
-                    if (this.addData.tracks.includes("video")) {
-                        localTracks.push(this.localUser.videoTrack = await AgoraRTC.createCameraVideoTrack())
-                    }
+                    // 创建本地音频和视频轨道
+                    await Promise.all(['audio', 'video'].map(async (trackType) => {
+                        const createTrack = trackType === 'audio' ? AgoraRTC.createMicrophoneAudioTrack : AgoraRTC.createCameraVideoTrack;
+                        const trackKey = `${trackType}Track`;
+                        try {
+                            this.localUser[trackKey] = await createTrack();
+                            localTracks.push(this.localUser[trackKey]);
+                        } catch (e) {
+                            if (e.code === 'DEVICE_NOT_FOUND') {
+                                console.warn(`${trackType} device not found:`, e);
+                            } else {
+                                throw e;
+                            }
+                        }
+                    }));
                     // 将本地视频曲目播放到本地浏览器、将本地音频和视频发布到频道。
                     if (localTracks.length > 0) {
                         await this.agoraClient.publish(localTracks);
                     }
-                    //
+                    // 显示会议组件
                     this.meetingShow = true;
                 } catch (error) {
                     console.error(error)
                     $A.modalError({
                         language: false,
                         content: getErrorMessage(error.code, getLanguage()) || this.$L("会议组件加载失败！"),
-                        onOk: async _ => {
-                            this.onBeforeClose()
-                            resolve()
-                        }
+                        onOk: this.onBeforeClose
                     });
                 }
             } catch (e) { }
@@ -633,9 +647,17 @@ export default {
         async openAudio() {
             if (this.audioLoad || this.localUser.audioTrack) return;
             this.audioLoad = true;
-            this.localUser.audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
-            await this.agoraClient.publish([this.localUser.audioTrack]);
-            this.audioLoad = false;
+            try {
+                this.localUser.audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
+                await this.agoraClient.publish([this.localUser.audioTrack]);
+            } catch (e) {
+                $A.modalError({
+                    language: false,
+                    content: getErrorMessage(e.code, getLanguage()) || this.$L("开启麦克风失败！"),
+                });
+            } finally {
+                this.audioLoad = false;
+            }
         },
 
         async closeAudio() {
@@ -651,9 +673,17 @@ export default {
         async openVideo() {
             if (this.videoLoad || this.localUser.videoTrack) return;
             this.videoLoad = true;
-            this.localUser.videoTrack = await AgoraRTC.createCameraVideoTrack()
-            await this.agoraClient.publish([this.localUser.videoTrack]);
-            this.videoLoad = false;
+            try {
+                this.localUser.videoTrack = await AgoraRTC.createCameraVideoTrack()
+                await this.agoraClient.publish([this.localUser.videoTrack]);
+            } catch (e) {
+                $A.modalError({
+                    language: false,
+                    content: getErrorMessage(e.code, getLanguage()) || this.$L("开启摄像头失败！"),
+                });
+            } finally {
+                this.videoLoad = false;
+            }
         },
 
         async closeVideo() {

@@ -1,5 +1,5 @@
 <template>
-    <div class="meeting-warp" :class="{'meeting-full': $isSubElectron}">
+    <div class="meeting-warp">
         <!-- 加入/新建 -->
         <Modal
             v-model="addShow"
@@ -121,16 +121,6 @@
     </div>
 </template>
 
-<style lang="scss" scoped>
-.meeting-full {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #fff;
-}
-</style>
 <script>
 import {mapState} from 'vuex'
 import Player from "./player.vue";
@@ -596,6 +586,9 @@ export default {
                     this.localUser.uid = await this.agoraClient.join(options.appid, options.channel, options.token, options.uid)
                     // 创建本地音频和视频轨道
                     await Promise.all(['audio', 'video'].map(async (trackType) => {
+                        if (!this.addData.tracks.includes(trackType)) {
+                            return;
+                        }
                         const createTrack = trackType === 'audio' ? AgoraRTC.createMicrophoneAudioTrack : AgoraRTC.createCameraVideoTrack;
                         const trackKey = `${trackType}Track`;
                         try {

@@ -121,5 +121,6 @@ class ProjectTaskObserver
                 Deleted::forget('projectTask', $projectTask->id, $forgetUserids);
                 break;
         }
+        ProjectTask::whereParentId($projectTask->id)->change(['visibility' => $projectTask->visibility]);
     }
 }

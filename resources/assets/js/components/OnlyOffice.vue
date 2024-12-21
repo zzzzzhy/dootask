@@ -180,6 +180,23 @@ export default {
             return type;
         },
 
+        async getUserData() {
+            if (!this.userInfo.userid && this.userId && this.userToken) {
+                this.$store.dispatch("showSpinner", 300).then(_ => {})
+                try {
+                    await this.$store.dispatch("getUserInfo");
+                } catch (e) {
+                    console.warn(e);
+                } finally {
+                    this.$store.dispatch("hiddenSpinner").then(_ => {})
+                }
+            }
+            return {
+                "id": String(this.userInfo.userid),
+                "name": this.userInfo.nickname
+            }
+        },
+
         loadFile(keyAppend = '') {
             if (this.docEditor !== null) {
                 this.docEditor.destroyEditor();
@@ -199,35 +216,32 @@ export default {
             if (this.historyId > 0) {
                 fileKey += `-${this.historyId}`
             }
-            const config = {
-                "document": {
-                    "fileType": this.fileType,
-                    "title": fileName,
-                    "key": fileKey,
-                    "url": `http://nginx/api/${this.fileUrl}`,
-                },
-                "editorConfig": {
-                    "mode": "edit",
-                    "lang": lang,
-                    "user": {
-                        "id": String(this.userInfo.userid),
-                        "name": this.userInfo.nickname
-                    },
-                    "customization": {
-                        "uiTheme": this.themeName === 'dark' ? "theme-dark" : "theme-classic-light",
-                        "forcesave": true,
-                        "help": false,
-                    },
-                    "callbackUrl": `http://nginx/api/file/content/office?id=${codeId}&dootask-token=${this.userToken}`,
-                },
-                "events": {
-                    "onDocumentReady": this.onDocumentReady,
-                },
-            };
-            if (/\/hideenOfficeTitle\//.test(window.navigator.userAgent)) {
-                config.document.title = " ";
-            }
             (async _ => {
+                const config = {
+                    "document": {
+                        "fileType": this.fileType,
+                        "title": fileName,
+                        "key": fileKey,
+                        "url": `http://nginx/api/${this.fileUrl}`,
+                    },
+                    "editorConfig": {
+                        "mode": "edit",
+                        "lang": lang,
+                        "user": await this.getUserData(),
+                        "customization": {
+                            "uiTheme": this.themeName === 'dark' ? "theme-dark" : "theme-classic-light",
+                            "forcesave": true,
+                            "help": false,
+                        },
+                        "callbackUrl": `http://nginx/api/file/content/office?id=${codeId}&dootask-token=${this.userToken}`,
+                    },
+                    "events": {
+                        "onDocumentReady": this.onDocumentReady,
+                    },
+                };
+                if (/\/hideenOfficeTitle\//.test(window.navigator.userAgent)) {
+                    config.document.title = " ";
+                }
                 if (this.readOnly || this.historyId > 0) {
                     config.editorConfig.mode = "view";
                     config.editorConfig.callbackUrl = null;

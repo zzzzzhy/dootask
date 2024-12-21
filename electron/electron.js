@@ -578,8 +578,6 @@ function createWebTabWindow(args) {
 
     // 创建父级窗口
     if (!webTabWindow) {
-        let config = Object.assign(args.config || {}, userConf.get('webTabWindow', {}));
-        let webPreferences = args.webPreferences || {};
         const titleBarOverlay = {
             height: webTabHeight
         }
@@ -600,14 +598,14 @@ function createWebTabWindow(args) {
             titleBarStyle: 'hidden',
             titleBarOverlay,
             backgroundColor: nativeTheme.shouldUseDarkColors ? '#3B3B3D' : '#EFF0F4',
-            webPreferences: Object.assign({
+            webPreferences: {
                 preload: path.join(__dirname, 'electron-preload.js'),
                 webSecurity: true,
                 nodeIntegration: true,
                 contextIsolation: true,
                 nativeWindowOpen: true
-            }, webPreferences),
-        }, config))
+            },
+        }, userConf.get('webTabWindow', {})))
 
         webTabWindow.on('resize', () => {
             resizeWebTab(0)
@@ -672,15 +670,20 @@ function createWebTabWindow(args) {
     webTabWindow.show();
 
     // 创建 tab 子窗口
-    const browserView = new BrowserView({
+    const viewOptions = Object.assign({
         useHTMLTitleAndIcon: true,
         useLoadingView: true,
         useErrorView: true,
-        webPreferences: {
-            preload: path.join(__dirname, 'electron-preload.js'),
-        }
-    })
-    if (nativeTheme.shouldUseDarkColors) {
+    }, args.config || {})
+    viewOptions.webPreferences = Object.assign({
+        preload: path.join(__dirname, 'electron-preload.js'),
+        nodeIntegration: true,
+        contextIsolation: true
+    }, args.webPreferences || {})
+    const browserView = new BrowserView(viewOptions)
+    if (args.backgroundColor) {
+        browserView.setBackgroundColor(args.backgroundColor)
+    } else if (nativeTheme.shouldUseDarkColors) {
         browserView.setBackgroundColor('#575757')
     } else {
         browserView.setBackgroundColor('#FFFFFF')

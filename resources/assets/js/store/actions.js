@@ -1106,10 +1106,9 @@ export default {
      * @param dispatch
      * @param params
      */
-    openChildWindow({dispatch}, params) {
-        dispatch("userUrl", params.path).then(path => {
-            $A.Electron.sendMessage('openChildWindow', Object.assign(params, {path}))
-        })
+    async openChildWindow({dispatch}, params) {
+        const path = await dispatch("userUrl", params.path)
+        $A.Electron.sendMessage('openChildWindow', Object.assign(params, {path}))
     },
 
     /**
@@ -1117,14 +1116,11 @@ export default {
      * @param dispatch
      * @param url
      */
-    openWebTabWindow({dispatch}, url) {
-        if ($A.getDomain(url) != $A.getDomain($A.mainUrl())) {
-            $A.Electron.sendMessage('openWebTabWindow', {url})
-            return
+    async openWebTabWindow({dispatch}, url) {
+        if ($A.getDomain(url) == $A.getDomain($A.mainUrl())) {
+            url = await dispatch("userUrl", url)
         }
-        dispatch("userUrl", url).then(url => {
-            $A.Electron.sendMessage('openWebTabWindow', {url})
-        })
+        $A.Electron.sendMessage('openWebTabWindow', {url})
     },
 
     /** *****************************************************************************************/

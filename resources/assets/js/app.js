@@ -1,4 +1,4 @@
-const isElectron = !!(window && window.process && window.process.type);
+const isElectron = !!(window && window.process && window.process.type && window.electron);
 const isEEUiApp = window && window.navigator && /eeui/i.test(window.navigator.userAgent);
 const isSoftware = isElectron || isEEUiApp;
 
@@ -192,7 +192,7 @@ $A.isElectron = isElectron;
 $A.isSoftware = isSoftware;
 $A.openLog = false;
 if (isElectron) {
-    $A.Electron = electron;
+    $A.Electron = window.electron;
     $A.Platform = /macintosh|mac os x/i.test(navigator.userAgent) ? "mac" : "win";
     $A.isMainElectron = /\s+MainTaskWindow\//.test(window.navigator.userAgent);
     $A.isSubElectron = /\s+SubTaskWindow\//.test(window.navigator.userAgent);

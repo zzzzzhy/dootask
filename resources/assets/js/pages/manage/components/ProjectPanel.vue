@@ -1018,7 +1018,7 @@ export default {
             this.handleColumnDebounce();
         },
         windowWidth() {
-            this.handleColumnDebounce();
+            this.handleColumnDebounce(100);
         },
         projectData() {
             this.sortData = this.getSort();
@@ -1697,7 +1697,14 @@ export default {
             return style;
         },
 
-        handleColumnDebounce() {
+        handleColumnDebounce(wait = 10) {
+            if (this.columnDebounceWait !== wait) {
+                this.columnDebounceWait = wait;
+                if (this.columnDebounceInvoke) {
+                    this.columnDebounceInvoke.cancel();
+                    this.columnDebounceInvoke = null;
+                }
+            }
             if (!this.columnDebounceInvoke) {
                 this.columnDebounceInvoke = debounce(_ => {
                     this.$nextTick(_ => {
@@ -1710,7 +1717,7 @@ export default {
                                 break;
                         }
                     })
-                }, 10);
+                }, wait);
             }
             this.columnDebounceInvoke();
         },

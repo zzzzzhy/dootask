@@ -113,7 +113,7 @@ class ProjectTaskObserver
                 break;
             case 2:
             case 3:
-                $dataType = $projectTask->visibility == 2 ? ['task'] : ['visibility'];
+                $dataType = $projectTask->visibility == 2 ? ['task'] : ['task', 'visibility'];
                 $forgetUserids = self::userids($projectTask, $dataType);
                 $projectOwnerUserIds = self::userids($projectTask, 'projectOwnerUser');
                 $recordUserids = array_diff($projectUserids, $forgetUserids, $projectOwnerUserIds);

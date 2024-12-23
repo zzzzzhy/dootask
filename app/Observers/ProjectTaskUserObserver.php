@@ -17,6 +17,9 @@ class ProjectTaskUserObserver
     public function created(ProjectTaskUser $projectTaskUser)
     {
         Deleted::forget('projectTask', $projectTaskUser->task_id, $projectTaskUser->userid);
+        if ($projectTaskUser->task_pid) {
+            Deleted::forget('projectTask', $projectTaskUser->task_pid, $projectTaskUser->userid);
+        }
     }
 
     /**

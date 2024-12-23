@@ -8,7 +8,7 @@ function __callData(key, requestData, state) {
     if (!$A.isJson(requestData)) {
         requestData = {}
     }
-    const callKey = key + "::" + encodeURIComponent(new URLSearchParams($.sortObject(requestData, [
+    const callKey = key + "::" + encodeURIComponent(new URLSearchParams($A.sortObject(requestData, [
         'page',
         'pagesize',
         'timerange',
@@ -19,8 +19,7 @@ function __callData(key, requestData, state) {
         callData.updated = 0
         callData.deleted = 0
         state.callAt.push(callData)
-        $A.IDBSet("callAt", state.callAt).then(_ => {
-        })
+        $A.IDBSet("callAt", state.callAt).catch(_ => { })
     }
 
     /**
@@ -38,26 +37,26 @@ function __callData(key, requestData, state) {
      * @returns {Promise<unknown>}
      */
     this.save = ({total, current_page, deleted_id}) => {
-        return new Promise(resolve => {
-            if (current_page === 1) {
-                let hasUpdate = false
-                const time = $A.dayjs().unix()
-                if (total > 0) {
-                    callData.updated = time
-                    hasUpdate = true
-                }
-                if ($A.isArray(deleted_id) && deleted_id.length > 0) {
-                    callData.deleted = time
-                    hasUpdate = true
-                } else {
-                    deleted_id = []
-                }
-                if (hasUpdate) {
-                    $A.IDBSet("callAt", state.callAt).then(_ => resolve(deleted_id))
-                } else {
-                    resolve(deleted_id)
-                }
+        return new Promise(async resolve => {
+            if (current_page !== 1) {
+                return
             }
+            let hasUpdate = false
+            const time = $A.dayjs().unix()
+            if (total > 0) {
+                callData.updated = time
+                hasUpdate = true
+            }
+            if ($A.isArray(deleted_id) && deleted_id.length > 0) {
+                callData.deleted = time
+                hasUpdate = true
+            } else {
+                deleted_id = []
+            }
+            if (hasUpdate) {
+                await $A.IDBSet("callAt", state.callAt)
+            }
+            resolve(deleted_id)
         })
     }
 

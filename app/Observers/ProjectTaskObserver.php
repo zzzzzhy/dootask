@@ -92,7 +92,7 @@ class ProjectTaskObserver
         }
         $array = [];
         if (in_array('task', $dataType)) {
-            $array = array_merge($array, ProjectTaskUser::whereTaskId($projectTask->id)->pluck('userid')->toArray());
+            $array = array_merge($array, ProjectTaskUser::whereTaskId($projectTask->id)->orWhere('task_pid' ,$projectTask->id)->pluck('userid')->toArray());
         }
         if (in_array('visibility', $dataType)) {
             $array = array_merge($array, ProjectTaskVisibilityUser::whereTaskId($projectTask->id)->pluck('userid')->toArray());
@@ -113,7 +113,7 @@ class ProjectTaskObserver
                 break;
             case 2:
             case 3:
-                $dataType = $projectTask->visibility == 2 ? ['task'] : ['task', 'visibility'];
+                $dataType = $projectTask->visibility == 2 ? ['task'] : ['visibility'];
                 $forgetUserids = self::userids($projectTask, $dataType);
                 $projectOwnerUserIds = self::userids($projectTask, 'projectOwnerUser');
                 $recordUserids = array_diff($projectUserids, $forgetUserids, $projectOwnerUserIds);

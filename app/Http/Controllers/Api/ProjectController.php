@@ -1058,10 +1058,6 @@ class ProjectController extends AbstractController
             $query->where('project_users.owner', 1);
             $query->where('project_users.userid', $userid);
         });
-        $builder->leftJoin('project_task_users as project_sub_task_users', function ($query) use($userid) {
-            $query->on('project_sub_task_users.task_pid', '=', 'project_tasks.parent_id');
-            $query->where('project_sub_task_users.userid', $userid);
-        });
         $builder->leftJoin('project_task_visibility_users', function ($query) use($userid) {
             $query->on('project_task_visibility_users.task_id', '=', 'project_tasks.id');
             $query->where('project_task_visibility_users.userid', $userid);
@@ -1071,7 +1067,6 @@ class ProjectController extends AbstractController
             $query->orWhere("project_users.userid", $userid);
             $query->orWhere("project_task_users.userid", $userid);
             $query->orWhere("project_task_visibility_users.userid", $userid);
-            $query->orWhere("project_sub_task_users.userid", $userid);
         });
         // 优化子查询汇总
         $builder->leftJoinSub(function ($query) {

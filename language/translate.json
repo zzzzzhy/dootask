@@ -27982,5 +27982,29 @@
         "fr": "Traitement en cours, veuillez réessayer plus tard...",
         "id": "Sedang diproses, silakan coba lagi nanti...",
         "ru": "Обработка, пожалуйста, повторите попытку позже..."
+    },
+    {
+        "key": "开启麦克风失败！",
+        "zh": "",
+        "zh-CHT": "開啟麥克風失敗！",
+        "en": "Failed to turn on the microphone!",
+        "ko": "마이크 켜기에 실패했습니다!",
+        "ja": "マイクの起動に失敗しました！",
+        "de": "Das Einschalten des Mikrofons ist fehlgeschlagen!",
+        "fr": "Échec de l'activation du microphone !",
+        "id": "Gagal menghidupkan mikrofon!",
+        "ru": "Не удалось включить микрофон!"
+    },
+    {
+        "key": "开启摄像头失败！",
+        "zh": "",
+        "zh-CHT": "開啟攝像頭失敗！",
+        "en": "Failed to turn on the camera!",
+        "ko": "카메라 켜기에 실패했습니다!",
+        "ja": "カメラの起動に失敗しました！",
+        "de": "Das Einschalten der Kamera ist fehlgeschlagen!",
+        "fr": "Échec de l'activation de la caméra !",
+        "id": "Gagal menghidupkan kamera!",
+        "ru": "Не удалось включить камеру!"
     }
 ]

@@ -423,7 +423,11 @@ class WebSocketDialog extends AbstractModel
                     WebSocketDialogUser::updateInsert([
                         'dialog_id' => $this->id,
                         'userid' => $value,
-                    ], $updateData, [], $isInsert);
+                    ], $updateData, function() use ($value) {
+                        return [
+                            'bot' => User::isBot($value) ? 1 : 0,
+                        ];
+                    }, $isInsert);
                     if ($isInsert) {
                         WebSocketDialogMsg::sendMsg(null, $this->id, 'notice', [
                             'notice' => User::userid2nickname($value) . " 已加入群组"

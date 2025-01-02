@@ -210,8 +210,8 @@ class AbstractModel extends Model
     /**
      * 数据库更新或插入
      * @param $where
-     * @param array $update 存在时更新的内容
-     * @param array $insert 不存在时插入的内容，如果没有则插入更新内容
+     * @param array|\Closure $update 存在时更新的内容
+     * @param array|\Closure $insert 不存在时插入的内容，如果没有则插入更新内容
      * @param bool $isInsert 是否是插入数据
      * @return AbstractModel|\Illuminate\Database\Eloquent\Builder|Model|object|static|null
      */
@@ -220,6 +220,12 @@ class AbstractModel extends Model
         $row = static::where($where)->first();
         if (empty($row)) {
             $row = new static;
+            if ($update instanceof \Closure) {
+                $update = $update();
+            }
+            if ($insert instanceof \Closure) {
+                $insert = $insert();
+            }
             $array = array_merge($where, $insert ?: $update);
             if (isset($array[$row->primaryKey])) {
                 unset($array[$row->primaryKey]);
@@ -227,6 +233,9 @@ class AbstractModel extends Model
             $row->updateInstance($array);
             $isInsert = true;
         } elseif ($update) {
+            if ($update instanceof \Closure) {
+                $update = $update();
+            }
             $row->updateInstance($update);
             $isInsert = false;
         }

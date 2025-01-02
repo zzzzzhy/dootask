@@ -219,7 +219,11 @@ class Project extends AbstractModel
                     'userid' => $userid,
                 ], [
                     'important' => 1
-                ]);
+                ], function () use ($userid) {
+                    return [
+                        'bot' => User::isBot($userid) ? 1 : 0,
+                    ];
+                });
             }
             WebSocketDialogUser::whereDialogId($this->dialog_id)->whereNotIn('userid', $userids)->whereImportant(1)->remove();
         });

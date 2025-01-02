@@ -66,11 +66,14 @@ export default defineConfig(({command, mode}) => {
                                 fs.unlinkSync(destPath);
                                 console.log(`Removed ${destPath}`);
                             }
-                        } else {
-                            fs.mkdirSync(path.dirname(destPath), {recursive: true});
-                            fs.copyFileSync(filePath, destPath);
-                            console.log(`Copied ${filePath} to ${destPath}`);
+                            return;
                         }
+                        if (path.basename(filePath) === '.DS_Store') {
+                            return;
+                        }
+                        fs.mkdirSync(path.dirname(destPath), {recursive: true});
+                        fs.copyFileSync(filePath, destPath);
+                        console.log(`Copied ${filePath} to ${destPath}`);
                     }
                 });
             }

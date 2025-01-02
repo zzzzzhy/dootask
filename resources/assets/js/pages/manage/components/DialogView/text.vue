@@ -1,6 +1,7 @@
 <template>
     <div class="content-text no-dark-content">
-        <DialogMarkdown v-if="msg.type === 'md'" @click="viewText" :text="msg.text"/>
+        <div v-if="isOverdueMsg" class="content-overdue">{{$L('此消息已经过期')}}</div>
+        <DialogMarkdown v-else-if="msg.type === 'md'" @click="viewText" :text="msg.text"/>
         <pre v-else @click="viewText" v-html="$A.formatTextMsg(msg.text, userId)"></pre>
 
         <template v-if="translation">
@@ -24,6 +25,7 @@ export default {
     props: {
         msgId: Number,
         msg: Object,
+        createdAt: String,
     },
     computed: {
         ...mapState(['cacheTranslations', 'cacheTranslationLanguage']),
@@ -33,6 +35,10 @@ export default {
                 return item.key === `msg-${msgId}` && item.language === cacheTranslationLanguage;
             });
             return translation ? translation : null;
+        },
+
+        isOverdueMsg({msg, createdAt}) {
+            return msg.text === '...' && $A.daytz(createdAt).isBefore($A.daytz().subtract(10, 'minute'));
         },
     },
     methods: {

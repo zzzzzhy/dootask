@@ -26,7 +26,7 @@
             <!--详情-->
             <div ref="content" class="dialog-content" :class="contentClass">
                 <!--文本-->
-                <TextMsg v-if="msgData.type === 'text'" :msgId="msgData.id" :msg="msgData.msg" @viewText="viewText"/>
+                <TextMsg v-if="msgData.type === 'text'" :msgId="msgData.id" :msg="msgData.msg" :createdAt="msgData.created_at" @viewText="viewText"/>
                 <!--长文本-->
                 <LongTextMsg v-else-if="msgData.type === 'longtext'" :msgId="msgData.id" :msg="msgData.msg" @viewText="viewText" @downFile="downFile"/>
                 <!--文件-->

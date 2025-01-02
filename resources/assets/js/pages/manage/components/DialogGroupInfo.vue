@@ -18,15 +18,35 @@
 
         <div class="group-info-user">
             <ul>
-                <li v-for="(item, index) in userList" :key="index" @click="openUser(item.userid)">
-                    <UserAvatar :userid="item.userid" :size="32" showName/>
-                    <div v-if="item.userid === dialogData.owner_id" class="user-tag">{{ $L("群主") }}</div>
-                    <div v-else-if="operableExit(item)" class="user-exit" @click.stop="onExit(item)"><Icon type="md-exit"/></div>
-                </li>
-                <li v-if="userList.length === 0" class="no">
+                <li v-if="allList.length === 0" class="no">
                     <Loading v-if="loadIng > 0"/>
                     <span v-else>{{$L('没有符合条件的数据')}}</span>
                 </li>
+                <template v-else-if="botList.length > 0">
+                    <li class="label">
+                        <span>{{$L('群机器人')}}</span>
+                    </li>
+                    <li v-for="item in botList" @click="openUser(item.userid)">
+                        <UserAvatar :userid="item.userid" :size="32" showName/>
+                        <div v-if="item.userid === dialogData.owner_id" class="user-tag">{{ $L("群主") }}</div>
+                        <div v-else-if="operableExit(item)" class="user-exit" @click.stop="onExit(item)"><Icon type="md-exit"/></div>
+                    </li>
+                    <li class="label">
+                        <span>{{$L(`群成员 (${userList.length}人)`)}}</span>
+                    </li>
+                    <li v-for="item in userList" @click="openUser(item.userid)">
+                        <UserAvatar :userid="item.userid" :size="32" showName/>
+                        <div v-if="item.userid === dialogData.owner_id" class="user-tag">{{ $L("群主") }}</div>
+                        <div v-else-if="operableExit(item)" class="user-exit" @click.stop="onExit(item)"><Icon type="md-exit"/></div>
+                    </li>
+                </template>
+                <template v-else>
+                    <li v-for="item in userList" @click="openUser(item.userid)">
+                        <UserAvatar :userid="item.userid" :size="32" showName/>
+                        <div v-if="item.userid === dialogData.owner_id" class="user-tag">{{ $L("群主") }}</div>
+                        <div v-else-if="operableExit(item)" class="user-exit" @click.stop="onExit(item)"><Icon type="md-exit"/></div>
+                    </li>
+                </template>
             </ul>
         </div>
 
@@ -103,7 +123,7 @@ export default {
             return '未知'
         },
 
-        userList() {
+        allList() {
             const {dialogUser, searchKey, cacheUserBasic, dialogData} = this;
             const list = dialogUser.map(item => {
                 const userBasic = cacheUserBasic.find(basic => basic.userid == item.userid)
@@ -126,7 +146,16 @@ export default {
                 }
                 return $A.dayjs(a.created_at) - $A.dayjs(b.created_at);
             })
-        }
+        },
+
+        botList({allList}) {
+            return allList.filter(item => item.bot)
+        },
+
+
+        userList({allList}) {
+            return allList.filter(item => !item.bot)
+        },
     },
 
     watch: {
@@ -173,7 +202,9 @@ export default {
                 this.dialogUser = data;
                 this.$store.dispatch("saveDialog", {
                     id: this.dialogId,
-                    people: data.length
+                    people: data.length,
+                    people_user: data.filter(item => !item.bot).length,
+                    people_bot: data.filter(item => item.bot).length,
                 });
             }).catch(({msg}) => {
                 $A.modalError(msg);

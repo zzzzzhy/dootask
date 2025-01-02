@@ -1623,7 +1623,9 @@ export default {
                             if (this.cacheDialogs.find(({id}) => id == this.dialogId)) {
                                 this.$store.dispatch("saveDialog", {
                                     id: this.dialogId,
-                                    people: data.length
+                                    people: data.length,
+                                    people_user: data.filter(item => !item.bot).length,
+                                    people_bot: data.filter(item => item.bot).length,
                                 })
                             }
                             if (data.length > 0) {

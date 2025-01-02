@@ -999,7 +999,7 @@ export default {
         },
 
         peopleNum() {
-            return this.dialogData.type === 'group' ? $A.runNum(this.dialogData.people) : 0;
+            return this.dialogData.type === 'group' ? $A.runNum(this.dialogData.people_user) : 0;
         },
 
         pasteTitle() {

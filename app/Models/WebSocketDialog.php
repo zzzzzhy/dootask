@@ -265,7 +265,9 @@ class WebSocketDialog extends AbstractModel
             // 未读消息
             $data = array_merge($data, self::generateUnread($data['id'], $userid));
             // 对话人数
-            $data['people'] = $data['people'] ?? WebSocketDialogUser::whereDialogId($data['id'])->count();
+            if (!isset($data['people'])) {
+                $data = array_merge($data, self::generatePeople($data['id']));
+            }
             // 有待办
             $data['todo_num'] = $data['todo_num'] ?? WebSocketDialogMsgTodo::whereDialogId($data['id'])->whereUserid($userid)->whereDoneAt(null)->count();
             // 最后消息
@@ -402,6 +404,26 @@ class WebSocketDialog extends AbstractModel
     }
 
     /**
+     * 获取对话人数
+     * @param $dialogId
+     * @return array
+     */
+    public static function generatePeople($dialogId)
+    {
+        $counts = WebSocketDialogUser::whereDialogId($dialogId)
+            ->groupBy('bot')
+            ->selectRaw('bot, COUNT(*) as count')
+            ->pluck('count', 'bot');
+        $userCount = $counts->get(0, 0);    // 非机器人数量
+        $botCount = $counts->get(1, 0);     // 机器人数量
+        return [
+            'people' => $userCount + $botCount,
+            'people_user' => $userCount,
+            'people_bot' => $botCount,
+        ];
+    }
+
+    /**
      * 加入聊天室
      * @param int|array $userid         加入的会员ID或会员ID组
      * @param int $inviter              邀请人
@@ -436,10 +458,9 @@ class WebSocketDialog extends AbstractModel
                 }
             }
         });
-        $this->pushMsg("groupUpdate", [
-            'id' => $this->id,
-            'people' => WebSocketDialogUser::whereDialogId($this->id)->count()
-        ]);
+        $data = WebSocketDialog::generatePeople($this->id);
+        $data['id'] = $this->id;
+        $this->pushMsg("groupUpdate", $data);
         return true;
     }
 
@@ -496,10 +517,9 @@ class WebSocketDialog extends AbstractModel
             });
         });
         //
-        $this->pushMsg("groupUpdate", [
-            'id' => $this->id,
-            'people' => WebSocketDialogUser::whereDialogId($this->id)->count()
-        ]);
+        $data = WebSocketDialog::generatePeople($this->id);
+        $data['id'] = $this->id;
+        $this->pushMsg("groupUpdate", $data);
     }
 
     /**

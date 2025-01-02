@@ -11,13 +11,15 @@
             <ListItem v-for="(items, userid) in tipsTask" :key="userid">
                 <div class="list-content">
                     <UserAvatar :userid="userid" :size="28" :show-icon="true" :show-name="true"/>
-                    <div class="list-task" v-for="(item, key) in items" :key="key">
-                        <div class="list-task-info">
-                            <span>[{{ item.project_name }}] </span>
-                            <span :title="item.name">{{ item.name }}</span>
+                    <template v-for="data in formatItems(items)">
+                        <div class="list-task label">
+                            <div class="list-task-name" :title="data.project_name">{{ data.project_name }}</div>
                         </div>
-                        <div class="list-task-date">{{ getCutTime(item) }}</div>
-                    </div>
+                        <div class="list-task" v-for="(item, key) in data.list" :key="key">
+                            <div class="list-task-name" :title="item.name">{{ item.name }}</div>
+                            <div class="list-task-date">{{ getCutTime(item) }}</div>
+                        </div>
+                    </template>
                 </div>
             </ListItem>
         </List>
@@ -87,7 +89,7 @@ export default {
                         return
                     }
                     this.show = true;
-                    let taskObj = {}
+                    const taskObj = {}
                     userids.map(userid => {
                         data.data.map(h => {
                             if ((h.task_user || []).map(k => k.owner ? k.userid : 0).indexOf(userid) !== -1) {
@@ -102,6 +104,22 @@ export default {
                     resolve(true)
                 });
             });
+        },
+
+        formatItems(items) {
+            return Array.from(
+                items.reduce((map, item) => {
+                    if (!map.has(item.project_id)) {
+                        map.set(item.project_id, {
+                            project_id: item.project_id,
+                            project_name: item.project_name,
+                            list: []
+                        });
+                    }
+                    map.get(item.project_id).list.push(item);
+                    return map;
+                }, new Map()).values()
+            );
         }
     }
 }

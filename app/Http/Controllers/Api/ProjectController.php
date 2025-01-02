@@ -1159,6 +1159,7 @@ class ProjectController extends AbstractController
         $list = ProjectTask::with(['taskUser'])
             ->select([
                 'projects.name as project_name',
+                'project_tasks.project_id',
                 'project_tasks.id',
                 'project_tasks.name',
                 'project_tasks.start_at',

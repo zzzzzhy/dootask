@@ -433,6 +433,7 @@ if [ $# -gt 0 ]; then
                 error "数据库初始化失败!"
                 exit 1
             fi
+            sleep 3
             chmod -R 775 "${cur_path}/docker/mysql/data"
         done
         # 数据库迁移

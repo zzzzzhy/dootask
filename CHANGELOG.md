@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.42.37]
+
+### Bug Fixes
+
+- 部分电脑无法复制的问题
+- 修复任务可见性 - 任务重覆获取, 子任务负责人看不到任务问题
+
+### Performance
+
+- 更新小海豚表情包
+- 优化任务时间冲突提示
+- 优化消息
+- 群聊总人数排除机器人
+
 ## [0.42.26]
 
 ### Bug Fixes

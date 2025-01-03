@@ -28006,5 +28006,41 @@
         "fr": "Échec de l'activation de la caméra !",
         "id": "Gagal menghidupkan kamera!",
         "ru": "Не удалось включить камеру!"
+    },
+    {
+        "key": "群机器人",
+        "zh": "",
+        "zh-CHT": "群機器人",
+        "en": "Group Bot",
+        "ko": "그룹 봇",
+        "ja": "グループボット",
+        "de": "Gruppen-Bot",
+        "fr": "Bot de groupe",
+        "id": "Bot Grup",
+        "ru": "Групповой бот"
+    },
+    {
+        "key": "群成员 ((%T1)人)",
+        "zh": "",
+        "zh-CHT": "群成員 ((%T1)人)",
+        "en": "Group members ((%T1) people)",
+        "ko": "그룹 구성원 ((%T1)명)",
+        "ja": "グループメンバー ((%T1)人)",
+        "de": "Gruppenmitglieder ((%T1) Personen)",
+        "fr": "Membres du groupe ((%T1) personnes)",
+        "id": "Anggota grup ((%T1) orang)",
+        "ru": "Участники группы ((%T1) человек)"
+    },
+    {
+        "key": "此消息已经过期",
+        "zh": "",
+        "zh-CHT": "此消息已經過期",
+        "en": "This message has expired",
+        "ko": "이 메시지는 만료되었습니다",
+        "ja": "このメッセージは有効期限が切れました",
+        "de": "Diese Nachricht ist abgelaufen",
+        "fr": "Ce message a expiré",
+        "id": "Pesan ini telah kedaluwarsa",
+        "ru": "Это сообщение истекло"
     }
 ]

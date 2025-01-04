@@ -139,12 +139,12 @@ class Report extends AbstractModel
                 // 如果设置了周期偏移量
                 empty( $offset ) || $now_dt->subWeeks( abs( $offset ) );
                 $now_dt->startOfWeek(); // 设置为当周第一天
-                return $now_dt->year . $now_dt->weekOfYear;
+                return now()->year . $now_dt->weekOfYear;
             },
             Report::DAILY => function() use ($now_dt, $offset) {
                 // 如果设置了周期偏移量
                 empty( $offset ) || $now_dt->subDays( abs( $offset ) );
-                return $now_dt->format("Ymd");
+                return now()->format("Ymd");
             },
             default => "",
         };

@@ -68,7 +68,7 @@ spec:
         volumeMounts:
         - name: app-data
           mountPath: /var/log/onlyoffice
-          subPath: office/logs
+          subPath: office
       volumes:
       - name: app-data
         persistentVolumeClaim:

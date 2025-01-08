@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dootask-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: init
+        image: kuaifan/php:swoole-8.0.rc18
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            cd /var/www && \
+            composer install && \
+            php artisan migrate --seed && \
+            php artisan storage:link
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_PORT
+        - name: MYSQL_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: app-code
+          mountPath: /var/www
+      volumes:
+      - name: app-code
+        persistentVolumeClaim:
+          claimName: dootask-app-pvc
+      restartPolicy: OnFailure

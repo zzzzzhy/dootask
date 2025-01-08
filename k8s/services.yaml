@@ -1,0 +1,357 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-office
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-office
+  template:
+    metadata:
+      labels:
+        app: dootask-office
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: office
+        image: onlyoffice/documentserver:8.2.2.1
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: APP_KEY
+        volumeMounts:
+        - name: office-logs
+          mountPath: /var/log/onlyoffice
+        - name: office-data
+          mountPath: /var/www/onlyoffice/Data
+      volumes:
+      - name: office-logs
+        emptyDir: {}
+      - name: office-data
+        persistentVolumeClaim:
+          claimName: dootask-office-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-fileview
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-fileview
+  template:
+    metadata:
+      labels:
+        app: dootask-fileview
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: fileview
+        image: kuaifan/fileview:4.2.0-SNAPSHOT-RC25
+        env:
+        - name: KK_CONTEXT_PATH
+          value: "/fileview"
+        - name: KK_OFFICE_PREVIEW_SWITCH_DISABLED
+          value: "true"
+        - name: KK_FILE_UPLOAD_ENABLED
+          value: "true"
+        - name: KK_MEDIA
+          value: "mp3,wav,mp4,mov,avi,wmv"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-drawio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-drawio
+  template:
+    metadata:
+      labels:
+        app: dootask-drawio
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: drawio-webapp
+        image: jgraph/drawio:24.7.17
+        volumeMounts:
+        - name: drawio-config
+          mountPath: /usr/local/tomcat/webapps/draw
+      - name: drawio-export
+        image: kuaifan/export-server:0.0.1
+        volumeMounts:
+        - name: drawio-fonts
+          mountPath: /usr/share/fonts/drawio
+      volumes:
+      - name: drawio-config
+        configMap:
+          name: dootask-drawio-config
+      - name: drawio-fonts
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-minder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-minder
+  template:
+    metadata:
+      labels:
+        app: dootask-minder
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: minder
+        image: kuaifan/minder:0.1.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-approve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-approve
+  template:
+    metadata:
+      labels:
+        app: dootask-approve
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: approve
+        image: kuaifan/dooapprove:0.1.5
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: TIMEZONE
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_PORT
+        - name: MYSQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_PASSWORD
+        - name: MYSQL_Prefix
+          value: "${DB_PREFIX}approve_"
+        - name: DEMO_DATA
+          value: "true"
+        - name: KEY
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: APP_KEY
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-ai
+  template:
+    metadata:
+      labels:
+        app: dootask-ai
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: ai
+        image: kuaifan/dootask-ai:0.2.6
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: REDIS_PORT
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-okr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-okr
+  template:
+    metadata:
+      labels:
+        app: dootask-okr
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: okr
+        image: kuaifan/doookr:0.4.5
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: TIMEZONE
+        - name: DOO_TASK_URL
+          value: "http://dootask-nginx"
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_PORT
+        - name: MYSQL_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_PASSWORD
+        - name: MYSQL_PREFIX
+          value: "${DB_PREFIX}"
+        - name: DEMO_DATA
+          value: "true"
+        - name: KEY
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: APP_KEY
+---
+# Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-office
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-office
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-fileview
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-fileview
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-drawio
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-drawio
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-minder
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-minder
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-approve
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-approve
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-ai
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-ai
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-okr
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: dootask-okr

@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-php
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-php
+  template:
+    metadata:
+      labels:
+        app: dootask-php
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: php
+        image: kuaifan/php:swoole-8.0.rc18
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_PORT
+        - name: MYSQL_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_DATABASE
+        - name: MYSQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dootask-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: app-code
+          mountPath: /var/www
+        - name: php-config
+          mountPath: /usr/local/etc/php/php.ini
+          subPath: php.ini
+      volumes:
+      - name: app-code
+        persistentVolumeClaim:
+          claimName: dootask-app-pvc
+      - name: php-config
+        configMap:
+          name: dootask-php-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dootask-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dootask-nginx
+  template:
+    metadata:
+      labels:
+        app: dootask-nginx
+    spec:
+      initContainers:
+      - name: wait-for-job
+        image: busybox
+        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        - name: app-code
+          mountPath: /var/www/public
+          subPath: public
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: dootask-nginx-config
+      - name: app-code
+        persistentVolumeClaim:
+          claimName: dootask-app-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-nginx
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+  - port: 443
+    targetPort: 443
+  selector:
+    app: dootask-nginx

@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dootask-prepare
+spec:
+  template:
+    spec:
+      containers:
+      - name: prepare
+        image: alpine/git
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            # 创建必要的目录
+            mkdir -p /workspace/dootask
+            cd /workspace/dootask
+            
+            # 克隆代码
+            git clone -b pro https://github.com/kuaifan/dootask.git .
+            
+            # 复制环境配置文件
+            cp .env.example .env
+            
+            # 设置目录权限
+            chown -R 1000:1000 /workspace/dootask
+            
+            # 复制代码到持久化存储
+            cp -r /workspace/dootask/* /var/www/
+            
+            # 创建必要的目录并设置权限
+            mkdir -p /var/www/storage/app/public
+            mkdir -p /var/www/storage/framework/cache
+            mkdir -p /var/www/storage/framework/sessions
+            mkdir -p /var/www/storage/framework/views
+            mkdir -p /var/www/storage/logs
+            chown -R 1000:1000 /var/www/storage
+            chmod -R 775 /var/www/storage
+            
+            # 创建office数据目录
+            mkdir -p /office/data
+            chown -R 1000:1000 /office/data
+            
+            echo "Preparation completed successfully"
+        volumeMounts:
+        - name: app-code
+          mountPath: /var/www
+        - name: office-data
+          mountPath: /office/data
+      volumes:
+      - name: app-code
+        persistentVolumeClaim:
+          claimName: dootask-app-pvc
+      - name: office-data
+        persistentVolumeClaim:
+          claimName: dootask-office-pvc
+      restartPolicy: Never
+---
+# PVC definitions
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dootask-app-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: csi-cephfs-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dootask-office-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: hitosea-rbd-sc
+  resources:
+    requests:
+      storage: 10Gi

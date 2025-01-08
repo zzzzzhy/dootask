@@ -15,7 +15,7 @@ spec:
       initContainers:
       - name: wait-for-job
         image: busybox
-        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+        command: ['sh', '-c', 'until [ -f /app/success ]; do echo "waiting for init-job to complete"; sleep 2; done']
       containers:
       - name: php
         image: kuaifan/php:swoole-8.0.rc18
@@ -80,7 +80,7 @@ spec:
       initContainers:
       - name: wait-for-job
         image: busybox
-        command: ['sh', '-c', 'until wget --spider http://dootask-init-job-service:80/health; do echo waiting for init-job; sleep 2; done;']
+        command: ['sh', '-c', 'until [ -f /app/success ]; do echo "waiting for init-job to complete"; sleep 2; done']
       containers:
       - name: nginx
         image: nginx:alpine

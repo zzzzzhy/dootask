@@ -37,17 +37,6 @@ spec:
             configMapKeyRef:
               name: dootask-config
               key: DB_DATABASE
-      - name: wait-for-redis
-        image: redis:alpine
-        command: ['sh', '-c']
-        args:
-          - |
-            echo "Waiting for Redis to be ready..."
-            until redis-cli -h dootask-redis ping >/dev/null 2>&1; do
-              echo "Redis is unavailable - sleeping"
-              sleep 2
-            done
-            echo "Redis is up and ready!"
       containers:
       - name: init
         image: kuaifan/php:swoole-8.0.rc18
@@ -115,7 +104,7 @@ spec:
             chown -R 1000:1000 /app
             chmod -R 775 /app/www/storage
             
-            echo "Preparation completed successfully"
+            echo "Preparation completed successfully" >/app/success
         env:
         - name: COMPOSER_ALLOW_SUPERUSER
           value: "1"

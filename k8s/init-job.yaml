@@ -45,8 +45,8 @@ spec:
         args:
           - |
             #[ -f "/app/success" ] && exit 0
-            mkdir -p /workspace/dootask
-            cd /workspace/dootask
+            mkdir -p /app/www
+            cd /app/www
             
             if [ ! -d ".git" ]; then
                 git clone -b pro https://github.com/kuaifan/dootask.git .
@@ -57,7 +57,7 @@ spec:
                     composer install
                     composer config --unset repos.packagist
                 fi
-                [[ -z "$(cat .env | grep "APP_KEY=" | awk -F '=' '{print $2}' | tr -d '\r\n' )" ]] && php artisan key:generate
+                [ -z "$(cat .env | grep "APP_KEY=" | awk -F '=' '{print $2}' | tr -d '\r\n' )" ] && php artisan key:generate
                 php artisan migrate --seed
             else
                 LOCAL_COMMIT=$(git rev-parse HEAD)
@@ -71,10 +71,8 @@ spec:
                 php artisan migrate
             fi
             
-            rm -rf /app
-            mkdir -p /app/www
+
             mkdir -p /app/supervisor/conf.d
-            mkdir -p /app/supervisor/log
             mkdir -p /app/php
             mkdir -p /app/nginx/conf.d
             mkdir -p /app/office/logs
@@ -84,9 +82,6 @@ spec:
             mkdir -p /app/drawio/webapp/js/croppie
             mkdir -p /app/drawio/webapp/stencils
             mkdir -p /app/drawio/export/fonts
-            
-            # 复制代码和配置文件
-            cp -r /workspace/dootask/ /app/www/
             
             # 复制PHP相关文件
             cp docker/crontab/crontab.conf /app/supervisor/conf.d/
@@ -111,7 +106,7 @@ spec:
             # 创建存储目录
             mkdir -p /app/www/storage/app/public
             mkdir -p /app/www/storage/framework/{cache,sessions,views}
-            mkdir -p /app/www/storage/logs
+
             
             # 设置权限
             chown -R 1000:1000 /app
@@ -147,9 +142,6 @@ spec:
               name: dootask-secret
               key: DB_PASSWORD
         volumeMounts:
-        - name: app-data
-          mountPath: /var/www
-          subPath: www
         - name: app-data
           mountPath: /app
       volumes:

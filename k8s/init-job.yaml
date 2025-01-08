@@ -48,8 +48,12 @@ spec:
             mkdir -p /workspace/dootask
             cd /workspace/dootask
             
-            # 克隆代码
-            git clone -b pro https://github.com/kuaifan/dootask.git .
+            if [ ! -d ".git" ]; then
+                git clone -b pro https://github.com/kuaifan/dootask.git .
+            else
+                git pull
+            fi
+            
             git submodule update --init --recursive
             
             # 复制环境配置文件

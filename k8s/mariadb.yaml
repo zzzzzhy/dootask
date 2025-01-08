@@ -25,6 +25,39 @@ spec:
       labels:
         app: dootask-mariadb
     spec:
+      initContainers:
+      - name: init-mysql
+        image: alpine/git
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            # 创建必要的目录
+            mkdir -p /workspace/dootask
+            cd /workspace/dootask
+            
+            if [ ! -d ".git" ]; then
+                git clone -b pro https://github.com/kuaifan/dootask.git .
+            else
+                git pull
+            fi
+            
+            # 创建MySQL目录
+            mkdir -p /mysql/conf.d
+            mkdir -p /mysql/scripts
+            
+            # 复制MySQL配置文件
+            cp -r docker/mysql/conf.d/* /mysql/conf.d/
+            cp docker/mysql/repassword.sh /mysql/scripts/
+            
+            # 设置权限
+            chown -R 999:999 /mysql
+            chmod -R 755 /mysql/conf.d
+            chmod 755 /mysql/scripts/repassword.sh
+            
+            echo "MySQL initialization completed successfully"
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /mysql
       containers:
       - name: mariadb
         image: mariadb:10.7.3
@@ -54,20 +87,14 @@ spec:
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
-        - name: mysql-conf
+        - name: mysql-data
           mountPath: /etc/mysql/conf.d
-          subPath: mysql/conf.d
-        - name: mysql-script
+          subPath: conf.d
+        - name: mysql-data
           mountPath: /etc/mysql/repassword.sh
-          subPath: mysql/repassword.sh
+          subPath: scripts/repassword.sh
       volumes:
       - name: mysql-data
-        persistentVolumeClaim:
-          claimName: dootask-mysql-data-pvc
-      - name: mysql-conf
-        persistentVolumeClaim:
-          claimName: dootask-mysql-data-pvc
-      - name: mysql-script
         persistentVolumeClaim:
           claimName: dootask-mysql-data-pvc
 ---

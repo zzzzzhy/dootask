@@ -75,7 +75,6 @@ spec:
       labels:
         app: dootask-fileview
     spec:
-
       containers:
       - name: fileview
         image: kuaifan/fileview:4.2.0-SNAPSHOT-RC25
@@ -373,6 +372,7 @@ metadata:
 spec:
   ports:
   - port: 80
+    targetPort: 80
   selector:
     app: dootask-office
 ---
@@ -382,7 +382,8 @@ metadata:
   name: dootask-fileview
 spec:
   ports:
-  - port: 80
+  - port: 8012
+    targetPort: 8012
   selector:
     app: dootask-fileview
 ---
@@ -392,7 +393,12 @@ metadata:
   name: dootask-drawio
 spec:
   ports:
-  - port: 80
+  - name: webapp
+    port: 8080
+    targetPort: 8080
+  - name: export
+    port: 8000
+    targetPort: 8000
   selector:
     app: dootask-drawio
 ---
@@ -403,6 +409,7 @@ metadata:
 spec:
   ports:
   - port: 80
+    targetPort: 80
   selector:
     app: dootask-minder
 ---
@@ -413,6 +420,7 @@ metadata:
 spec:
   ports:
   - port: 80
+    targetPort: 80
   selector:
     app: dootask-approve
 ---
@@ -422,7 +430,8 @@ metadata:
   name: dootask-ai
 spec:
   ports:
-  - port: 80
+  - port: 5001
+    targetPort: 5001
   selector:
     app: dootask-ai
 ---
@@ -432,7 +441,8 @@ metadata:
   name: dootask-okr
 spec:
   ports:
-  - port: 80
+  - port: 5566
+    targetPort: 5566
   selector:
     app: dootask-okr
 ---

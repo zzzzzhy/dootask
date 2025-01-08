@@ -36,28 +36,28 @@ spec:
           mountPath: /var/www/onlyoffice/Data
           subPath: office/data
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/vendor/requirejs/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/vendor/requirejs/require.js
           subPath: office/resources/require.js
         - name: app-data
           mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/common/main/resources/img/header
           subPath: office/resources/common/main/resources/img/header
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/css/app.css
           subPath: office/resources/documenteditor/main/resources/css/app.css
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/mobile/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/mobile/css/526.caf35c11a8d72ca5ac85.css
           subPath: office/resources/documenteditor/mobile/css/526.caf35c11a8d72ca5ac85.css
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/main/resources/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/main/resources/css/app.css
           subPath: office/resources/presentationeditor/main/resources/css/app.css
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/mobile/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/presentationeditor/mobile/css/923.f9cf19de1a25c2e7bf8b.css
           subPath: office/resources/presentationeditor/mobile/css/923.f9cf19de1a25c2e7bf8b.css
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/main/resources/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/main/resources/css/app.css
           subPath: office/resources/spreadsheeteditor/main/resources/css/app.css
         - name: app-data
-          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/css/
+          mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/css/611.1bef49f175e18fc085db.css
           subPath: office/resources/spreadsheeteditor/mobile/css/611.1bef49f175e18fc085db.css
       - name: office-logs
         image: busybox
@@ -127,19 +127,19 @@ spec:
         image: jgraph/drawio:24.7.17
         volumeMounts:
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/
+          mountPath: /usr/local/tomcat/webapps/draw/index.html
           subPath: drawio/webapp/index.html
         - name: app-data
           mountPath: /usr/local/tomcat/webapps/draw/stencils
           subPath: drawio/webapp/stencils
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/
+          mountPath: /usr/local/tomcat/webapps/draw/js/app.min.js
           subPath: drawio/webapp/js/app.min.js
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/croppie/
+          mountPath: /usr/local/tomcat/webapps/draw/js/croppie/croppie.min.css
           subPath: drawio/webapp/js/croppie/croppie.min.css
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/diagramly/
+          mountPath: /usr/local/tomcat/webapps/draw/js/diagramly/ElectronApp.js
           subPath: drawio/webapp/js/diagramly/ElectronApp.js
       - name: drawio-export
         image: kuaifan/export-server:0.0.1

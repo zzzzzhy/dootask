@@ -102,7 +102,7 @@ spec:
             
             
             # 复制Office相关文件
-            cp -r docker/office/resources/ /app/office/resources/
+            cp -r docker/office/resources/ /app/office/
             
             # 复制Drawio相关文件
             cp docker/drawio/webapp/index.html /app/drawio/webapp/
@@ -110,7 +110,7 @@ spec:
             cp docker/drawio/webapp/js/app.min.js /app/drawio/webapp/js/
             cp -r docker/drawio/webapp/js/croppie /app/drawio/webapp/js/
             cp docker/drawio/webapp/js/diagramly/ElectronApp.js /app/drawio/webapp/js/diagramly/
-            cp -r docker/drawio/export/fonts/ /app/drawio/export/fonts/
+            cp -r docker/drawio/export/fonts/ /app/drawio/export/
             
             # 创建存储目录
             mkdir -p /app/www/storage/app/public

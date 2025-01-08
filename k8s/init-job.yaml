@@ -44,7 +44,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            [ -f "/app/success" ] && exit 0
+            #[ -f "/app/success" ] && exit 0
             mkdir -p /workspace/dootask
             cd /workspace/dootask
             

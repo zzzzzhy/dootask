@@ -3,6 +3,7 @@ kind: Job
 metadata:
   name: dootask-init-job
 spec:
+  ttlSecondsAfterFinished: 60
   template:
     spec:
       initContainers:

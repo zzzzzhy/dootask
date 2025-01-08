@@ -96,9 +96,9 @@ spec:
       - name: nginx
         image: nginx:alpine
         ports:
-        - containerPort: 8088
+        - containerPort: 80
           name: http
-        - containerPort: 5443
+        - containerPort: 443
           name: https
         volumeMounts:
         - name: app-data

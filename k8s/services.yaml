@@ -30,11 +30,11 @@ spec:
               key: APP_KEY
         volumeMounts:
         - name: app-data
-          mountPath: /var/www/onlyoffice/Data
-          subPath: office/data
-        - name: app-data
           mountPath: /var/log/onlyoffice
           subPath: office/logs
+        - name: app-data
+          mountPath: /var/www/onlyoffice/Data
+          subPath: office/data
         - name: app-data
           mountPath: /var/www/onlyoffice/documentserver/web-apps/vendor/requirejs/require.js
           subPath: office/resources/require.js
@@ -59,6 +59,16 @@ spec:
         - name: app-data
           mountPath: /var/www/onlyoffice/documentserver/web-apps/apps/spreadsheeteditor/mobile/css/611.1bef49f175e18fc085db.css
           subPath: office/resources/spreadsheeteditor/mobile.css
+      - name: office-logs
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          tail -F /var/log/onlyoffice/*.log 2>/dev/null || true
+        volumeMounts:
+        - name: app-data
+          mountPath: /var/log/onlyoffice
+          subPath: office/logs
       volumes:
       - name: app-data
         persistentVolumeClaim:

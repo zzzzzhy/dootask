@@ -44,6 +44,16 @@ spec:
           mountPath: /var/lib/mysql
         - name: mysql-config
           mountPath: /etc/mysql/conf.d
+        - name: mysql-script
+          mountPath: /etc/mysql/repassword.sh
+          subPath: repassword.sh
+      volumes:
+      - name: mysql-config
+        persistentVolumeClaim:
+          claimName: dootask-mysql-config-pvc
+      - name: mysql-script
+        persistentVolumeClaim:
+          claimName: dootask-mysql-script-pvc
   volumeClaimTemplates:
   - metadata:
       name: mysql-data

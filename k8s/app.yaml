@@ -46,18 +46,22 @@ spec:
               name: dootask-secret
               key: DB_PASSWORD
         volumeMounts:
-        - name: app-code
+        - name: app-data
           mountPath: /var/www
-        - name: php-config
+          subPath: www
+        - name: app-data
+          mountPath: /etc/supervisor/conf.d
+          subPath: supervisor/conf.d
+        - name: app-data
+          mountPath: /var/log/supervisor
+          subPath: supervisor/log
+        - name: app-data
           mountPath: /usr/local/etc/php/php.ini
-          subPath: php.ini
+          subPath: php/php.ini
       volumes:
-      - name: app-code
+      - name: app-data
         persistentVolumeClaim:
           claimName: dootask-app-pvc
-      - name: php-config
-        configMap:
-          name: dootask-php-config
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -81,19 +85,19 @@ spec:
       - name: nginx
         image: nginx:alpine
         ports:
-        - containerPort: 80
-        - containerPort: 443
+        - containerPort: 8088
+          name: http
+        - containerPort: 5443
+          name: https
         volumeMounts:
-        - name: nginx-config
+        - name: app-data
           mountPath: /etc/nginx/conf.d
-        - name: app-code
+          subPath: nginx/conf.d
+        - name: app-data
           mountPath: /var/www/public
-          subPath: public
+          subPath: www/public
       volumes:
-      - name: nginx-config
-        configMap:
-          name: dootask-nginx-config
-      - name: app-code
+      - name: app-data
         persistentVolumeClaim:
           claimName: dootask-app-pvc
 ---
@@ -106,7 +110,9 @@ spec:
   ports:
   - port: 80
     targetPort: 8088
+    name: http
   - port: 443
     targetPort: 5443
+    name: https
   selector:
     app: dootask-nginx

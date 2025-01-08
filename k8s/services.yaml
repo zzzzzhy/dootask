@@ -127,19 +127,19 @@ spec:
         image: jgraph/drawio:24.7.17
         volumeMounts:
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/index.html
+          mountPath: /usr/local/tomcat/webapps/draw/
           subPath: drawio/webapp/index.html
         - name: app-data
           mountPath: /usr/local/tomcat/webapps/draw/stencils
           subPath: drawio/webapp/stencils
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/app.min.js
+          mountPath: /usr/local/tomcat/webapps/draw/js/
           subPath: drawio/webapp/js/app.min.js
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/croppie/croppie.min.css
+          mountPath: /usr/local/tomcat/webapps/draw/js/croppie/
           subPath: drawio/webapp/js/croppie/croppie.min.css
         - name: app-data
-          mountPath: /usr/local/tomcat/webapps/draw/js/diagramly/ElectronApp.js
+          mountPath: /usr/local/tomcat/webapps/draw/js/diagramly/
           subPath: drawio/webapp/js/diagramly/ElectronApp.js
       - name: drawio-export
         image: kuaifan/export-server:0.0.1

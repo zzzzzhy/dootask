@@ -64,7 +64,7 @@ spec:
           mountPath: /var/log/supervisor
           subPath: supervisor/log
         - name: app-data
-          mountPath: /usr/local/etc/php/php.ini
+          mountPath: /usr/local/etc/php/
           subPath: php/php.ini
       volumes:
       - name: app-data

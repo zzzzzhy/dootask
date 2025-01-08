@@ -50,26 +50,29 @@ spec:
             
             if [ ! -d ".git" ]; then
                 git clone -b pro https://github.com/kuaifan/dootask.git .
+                git submodule update --init --recursive
+                cp .env.docker .env
+                if [ ! -f "vendor/autoload.php" ]; then
+                    composer config repo.packagist composer https://packagist.phpcomposer.com
+                    composer install
+                    composer config --unset repos.packagist
+                fi
+                [[ -z "$(cat .env | grep "APP_KEY=" | awk -F '=' '{print $2}' | tr -d '\r\n' )" ]] && php artisan key:generate
+                php artisan migrate --seed
             else
+                LOCAL_COMMIT=$(git rev-parse HEAD)
                 git pull
+                REMOTE_COMMIT=$(git rev-parse HEAD)
+                if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
+                    echo "Git commit changed, updating submodules..."
+                    git submodule update --init --recursive
+                fi
+                composer update
+                php artisan migrate
             fi
             
-            git submodule update --init --recursive
-            
-            # 复制环境配置文件
-            cp .env.docker .env
-            if [ ! -f "vendor/autoload.php" ]; then
-                composer config repo.packagist composer https://packagist.phpcomposer.com
-                composer install
-                composer config --unset repos.packagist
-            fi
-            [[ -z "$(cat .env | grep "APP_KEY=" | awk -F '=' '{print $2}' | tr -d '\r\n' )" ]] && php artisan key:generate
-            php artisan migrate --seed
-            
-            # 创建应用目录结构
+            rm -rf /app
             mkdir -p /app/www
-            
-            # 创建所有必需的目录
             mkdir -p /app/supervisor/conf.d
             mkdir -p /app/supervisor/log
             mkdir -p /app/php

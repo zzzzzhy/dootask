@@ -101,7 +101,7 @@ spec:
           subPath: nginx/conf.d
         - name: app-data
           mountPath: /var/www/public
-          subPath: www/public
+          subPath: /app/www/public
       volumes:
       - name: app-data
         persistentVolumeClaim:

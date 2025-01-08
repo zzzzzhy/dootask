@@ -86,7 +86,7 @@ spec:
             mkdir -p /app/drawio/export/fonts
             
             # 复制代码和配置文件
-            cp -r /workspace/dootask/. /app/www/
+            cp -r /workspace/dootask/ /app/www/
             
             # 复制PHP相关文件
             cp docker/crontab/crontab.conf /app/supervisor/conf.d/
@@ -98,7 +98,7 @@ spec:
             cp -r docker/nginx/* /app/nginx/conf.d/
             
             # 复制Office相关文件
-            cp -r docker/office/resources/* /app/office/resources/
+            cp -r docker/office/resources/ /app/office/resources/
             
             # 复制Drawio相关文件
             cp docker/drawio/webapp/index.html /app/drawio/webapp/

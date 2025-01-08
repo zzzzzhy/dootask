@@ -43,7 +43,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            # 创建必要的目录
+            [ -f "/app/success" ] && exit 0
             mkdir -p /workspace/dootask
             cd /workspace/dootask
             

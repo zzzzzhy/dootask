@@ -15,7 +15,10 @@ spec:
       initContainers:
       - name: wait-for-job
         image: busybox
-        command: ['sh', '-c', 'until [ -f /app/success ]; do echo "waiting for init-job to complete"; sleep 2; done']
+        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
+        volumeMounts:
+        - name: app-data
+          mountPath: /app
       containers:
       - name: php
         image: kuaifan/php:swoole-8.0.rc18
@@ -80,7 +83,10 @@ spec:
       initContainers:
       - name: wait-for-job
         image: busybox
-        command: ['sh', '-c', 'until [ -f /app/success ]; do echo "waiting for init-job to complete"; sleep 2; done']
+        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
+        volumeMounts:
+        - name: app-data
+          mountPath: /app
       containers:
       - name: nginx
         image: nginx:alpine

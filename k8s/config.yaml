@@ -8,7 +8,7 @@ data:
   DB_DATABASE: "dootask"
   REDIS_HOST: "dootask-redis"
   REDIS_PORT: "6379"
-  TIMEZONE: "PRC"
+  TIMEZONE: "UTC"
 ---
 apiVersion: v1
 kind: Secret
@@ -17,8 +17,8 @@ metadata:
 type: Opaque
 stringData:
   DB_USERNAME: "dootask"
-  DB_PASSWORD: "your-password-here"
-  DB_ROOT_PASSWORD: "your-root-password-here"
-  APP_KEY: "your-app-key-here"
+  DB_PASSWORD: "123456"
+  DB_ROOT_PASSWORD: "123456"
+  APP_KEY: "zzzzzz"
 ---
 

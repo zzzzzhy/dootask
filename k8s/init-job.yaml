@@ -12,27 +12,27 @@ spec:
         args:
           - |
             echo "Waiting for MySQL to be ready..."
-            until mysql -h dootask-mariadb -u$MYSQL_USERNAME -p$MYSQL_PASSWORD -e "SELECT 1" >/dev/null 2>&1; do
+            until mysql -h dootask-mariadb -u$DB_USERNAME -p$DB_PASSWORD -e "SELECT 1" >/dev/null 2>&1; do
               echo "MySQL is unavailable - sleeping"
               sleep 2
             done
             
             # 尝试创建数据库
-            mysql -h dootask-mariadb -u$MYSQL_USERNAME -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+            mysql -h dootask-mariadb -u$DB_USERNAME -p$DB_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
             
             echo "MySQL is up and ready!"
         env:
-        - name: MYSQL_USERNAME
+        - name: DB_USERNAME
           valueFrom:
             secretKeyRef:
               name: dootask-secret
               key: DB_USERNAME
-        - name: MYSQL_PASSWORD
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: dootask-secret
               key: DB_PASSWORD
-        - name: MYSQL_DB_NAME
+        - name: DB_DATABASE
           valueFrom:
             configMapKeyRef:
               name: dootask-config
@@ -98,7 +98,7 @@ spec:
             cp docker/drawio/webapp/js/app.min.js /app/drawio/webapp/js/
             cp -r docker/drawio/webapp/js/croppie /app/drawio/webapp/js/
             cp docker/drawio/webapp/js/diagramly/ElectronApp.js /app/drawio/webapp/js/diagramly/
-            cp -r docker/drawio/export/fonts/* /app/drawio/export/fonts/
+            cp -r docker/drawio/export/fonts/ /app/drawio/export/fonts/
             
             # 创建存储目录
             mkdir -p /app/www/storage/app/public

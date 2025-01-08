@@ -102,11 +102,11 @@ kind: Service
 metadata:
   name: dootask-nginx
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 8088
   - port: 443
-    targetPort: 443
+    targetPort: 5443
   selector:
     app: dootask-nginx

@@ -24,20 +24,20 @@ spec:
             
             # 创建应用目录结构
             mkdir -p /app/www
+            
+            # 复制代码和配置文件
+            cp -r /workspace/dootask/. /app/www/
+            
+            # 创建其他目录
             mkdir -p /app/supervisor/conf.d
             mkdir -p /app/supervisor/log
             mkdir -p /app/php
             mkdir -p /app/nginx/conf.d
-            mkdir -p /app/mysql/conf.d
-            mkdir -p /app/mysql
             mkdir -p /app/office/logs
             mkdir -p /app/office/data
             mkdir -p /app/office/resources
             mkdir -p /app/drawio/webapp/{js,stencils}
             mkdir -p /app/drawio/export/fonts
-            
-            # 复制代码和配置文件
-            cp -r /workspace/dootask/* /app/www/
             
             # 复制PHP相关文件
             cp docker/crontab/crontab.conf /app/supervisor/conf.d/
@@ -47,10 +47,6 @@ spec:
             
             # 复制Nginx配置
             cp -r docker/nginx/* /app/nginx/conf.d/
-            
-            # 复制MySQL配置
-            cp docker/mysql/repassword.sh /app/mysql/
-            cp -r docker/mysql/conf.d/* /app/mysql/conf.d/
             
             # 复制Office相关文件
             cp -r docker/office/resources/* /app/office/resources/
@@ -63,8 +59,14 @@ spec:
             cp docker/drawio/webapp/js/diagramly/ElectronApp.js /app/drawio/webapp/js/diagramly/
             cp -r docker/drawio/export/fonts/* /app/drawio/export/fonts/
             
+            # 创建存储目录
+            mkdir -p /app/www/storage/app/public
+            mkdir -p /app/www/storage/framework/{cache,sessions,views}
+            mkdir -p /app/www/storage/logs
+            
             # 设置权限
             chown -R 1000:1000 /app
+            chmod -R 775 /app/www/storage
             
             echo "Preparation completed successfully"
         volumeMounts:

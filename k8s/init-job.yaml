@@ -12,10 +12,13 @@ spec:
         args:
           - |
             cd /var/www && \
-            composer install && \
+            export COMPOSER_ALLOW_SUPERUSER=1 && \
+            composer install --no-interaction && \
             php artisan migrate --seed && \
             php artisan storage:link
         env:
+        - name: COMPOSER_ALLOW_SUPERUSER
+          value: "1"
         - name: MYSQL_HOST
           valueFrom:
             configMapKeyRef:
@@ -42,10 +45,11 @@ spec:
               name: dootask-secret
               key: DB_PASSWORD
         volumeMounts:
-        - name: app-code
+        - name: app-data
           mountPath: /var/www
+          subPath: www
       volumes:
-      - name: app-code
+      - name: app-data
         persistentVolumeClaim:
           claimName: dootask-app-pvc
       restartPolicy: OnFailure

@@ -42,27 +42,22 @@ spec:
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
-        - name: mysql-config
+        - name: mysql-conf
           mountPath: /etc/mysql/conf.d
+          subPath: mysql/conf.d
         - name: mysql-script
           mountPath: /etc/mysql/repassword.sh
-          subPath: repassword.sh
+          subPath: mysql/repassword.sh
       volumes:
-      - name: mysql-config
+      - name: mysql-data
         persistentVolumeClaim:
-          claimName: dootask-mysql-config-pvc
+          claimName: dootask-mysql-data-pvc
+      - name: mysql-conf
+        persistentVolumeClaim:
+          claimName: dootask-app-pvc
       - name: mysql-script
         persistentVolumeClaim:
-          claimName: dootask-mysql-script-pvc
-  volumeClaimTemplates:
-  - metadata:
-      name: mysql-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: csi-cephfs-sc
-      resources:
-        requests:
-          storage: 10Gi
+          claimName: dootask-app-pvc
 ---
 apiVersion: v1
 kind: Service

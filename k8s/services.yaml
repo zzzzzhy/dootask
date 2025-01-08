@@ -33,6 +33,9 @@ spec:
           mountPath: /var/www/onlyoffice/Data
           subPath: office/data
         - name: app-data
+          mountPath: /var/log/onlyoffice
+          subPath: office/logs
+        - name: app-data
           mountPath: /var/www/onlyoffice/documentserver/web-apps/vendor/requirejs/require.js
           subPath: office/resources/require.js
         - name: app-data

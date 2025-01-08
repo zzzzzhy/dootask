@@ -89,16 +89,17 @@ spec:
             cp docker/php/php.ini /app/php/
             
             # 复制Nginx配置
-            sed -i "s/php:20000/dootask-php:20000/g" docker/nginx/default.conf
-            sed -i "s/fileview:8012/dootask-fileview:8012/g" docker/nginx/default.conf
-            sed -i "s/office/dootask-office/g" docker/nginx/default.conf
-            sed -i "s/drawio-webapp:8080/dootask-drawio:8080/g" docker/nginx/default.conf
-            sed -i "s/drawio-export:8000/dootask-drawio:8000/g" docker/nginx/default.conf
-            sed -i "s/minder/dootask-minder/g" docker/nginx/default.conf
-            sed -i "s/approve/dootask-approve/g" docker/nginx/default.conf
-            sed -i "s/okr/dootask-okr/g" docker/nginx/default.conf
-            sed -i "s/ai/dootask-ai/g" docker/nginx/default.conf
             cp -r docker/nginx/* /app/nginx/conf.d/
+            sed -i "s/php:20000/dootask-php:20000/g" /app/nginx/conf.d/default.conf
+            sed -i "s/fileview:8012/dootask-fileview:8012/g" /app/nginx/conf.d/default.conf
+            sed -i "s/office/dootask-office/g" /app/nginx/conf.d/default.conf
+            sed -i "s/drawio-webapp:8080/dootask-drawio:8080/g" /app/nginx/conf.d/default.conf
+            sed -i "s/drawio-export:8000/dootask-drawio:8000/g" /app/nginx/conf.d/default.conf
+            sed -i "s/minder/dootask-minder/g" /app/nginx/conf.d/default.conf
+            sed -i "s/approve/dootask-approve/g" /app/nginx/conf.d/default.conf
+            sed -i "s/okr/dootask-okr/g" /app/nginx/conf.d/default.conf
+            sed -i "s/ai:5001/dootask-ai:5001/g" /app/nginx/conf.d/default.conf
+            
             
             # 复制Office相关文件
             cp -r docker/office/resources/ /app/office/resources/

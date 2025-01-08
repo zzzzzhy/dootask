@@ -6,6 +6,7 @@ data:
   DB_HOST: "dootask-mariadb"
   DB_PORT: "3306"
   DB_DATABASE: "dootask"
+  DB_PREFIX: "pre_"
   REDIS_HOST: "dootask-redis"
   REDIS_PORT: "6379"
   TIMEZONE: "UTC"
@@ -21,4 +22,3 @@ stringData:
   DB_ROOT_PASSWORD: "123456"
   APP_KEY: "zzzzzz"
 ---
-

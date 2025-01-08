@@ -48,6 +48,11 @@ spec:
             secretKeyRef:
               name: dootask-secret
               key: DB_PASSWORD
+        - name: DB_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: dootask-config
+              key: DB_PREFIX
         volumeMounts:
         - name: app-data
           mountPath: /var/www

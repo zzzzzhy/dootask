@@ -52,19 +52,19 @@ spec:
             git submodule update --init --recursive
             
             # 复制环境配置文件
-            cp .env.example .env
-
-            composer install --no-interaction 
+            cp .env.docker .env
+            if [ ! -f "vendor/autoload.php" ]; then
+                composer config repo.packagist composer https://packagist.phpcomposer.com
+                composer install
+                composer config --unset repos.packagist
+            fi
+            [[ -z "$(cat .env | grep "APP_KEY=" | awk -F '=' '{print $2}' | tr -d '\r\n' )" ]] && php artisan key:generate
             php artisan migrate --seed
-            php artisan storage:link
-
+            
             # 创建应用目录结构
             mkdir -p /app/www
             
-            # 复制代码和配置文件
-            cp -r /workspace/dootask/. /app/www/
-            
-            # 创建其他目录
+            # 创建所有必需的目录
             mkdir -p /app/supervisor/conf.d
             mkdir -p /app/supervisor/log
             mkdir -p /app/php
@@ -72,14 +72,19 @@ spec:
             mkdir -p /app/office/logs
             mkdir -p /app/office/data
             mkdir -p /app/office/resources
-            mkdir -p /app/drawio/webapp/{js,stencils}
+            mkdir -p /app/drawio/webapp/js/diagramly
+            mkdir -p /app/drawio/webapp/js/croppie
+            mkdir -p /app/drawio/webapp/stencils
             mkdir -p /app/drawio/export/fonts
+            
+            # 复制代码和配置文件
+            cp -r /workspace/dootask/. /app/www/
             
             # 复制PHP相关文件
             cp docker/crontab/crontab.conf /app/supervisor/conf.d/
             cp docker/php/php.conf /app/supervisor/conf.d/
             cp docker/php/php.ini /app/php/
-            cp -r docker/log/supervisor/* /app/supervisor/log/
+            
             
             # 复制Nginx配置
             cp -r docker/nginx/* /app/nginx/conf.d/

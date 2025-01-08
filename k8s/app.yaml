@@ -58,8 +58,8 @@ spec:
           mountPath: /var/www
           subPath: www
         - name: app-data
-          mountPath: /etc/supervisor/conf.d
-          subPath: supervisor/conf.d
+          mountPath: /etc/supervisor/conf.d/
+          subPath: supervisor/conf.d/
         - name: app-data
           mountPath: /var/log/supervisor
           subPath: supervisor/log

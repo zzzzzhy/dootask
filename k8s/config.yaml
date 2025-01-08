@@ -21,13 +21,4 @@ stringData:
   DB_ROOT_PASSWORD: "your-root-password-here"
   APP_KEY: "your-app-key-here"
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: dootask-app-pvc
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Gi
+

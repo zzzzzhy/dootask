@@ -48,6 +48,7 @@ spec:
               sleep 2
             done
             echo "Redis is up and ready!"
+      containers:
       - name: init
         image: kuaifan/php:swoole-8.0.rc18
         command: ["/bin/sh", "-c"]
@@ -67,6 +68,7 @@ spec:
             composer install --no-interaction 
             php artisan migrate --seed
             php artisan storage:link
+
             # 创建应用目录结构
             mkdir -p /app/www
             
@@ -116,7 +118,7 @@ spec:
             echo "Preparation completed successfully"
         env:
         - name: COMPOSER_ALLOW_SUPERUSER
-          value: 1
+          value: "1"
         - name: MYSQL_HOST
           valueFrom:
             configMapKeyRef:

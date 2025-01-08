@@ -30,9 +30,6 @@ spec:
               key: APP_KEY
         volumeMounts:
         - name: app-data
-          mountPath: /var/log/onlyoffice
-          subPath: office/logs
-        - name: app-data
           mountPath: /var/www/onlyoffice/Data
           subPath: office/data
         - name: app-data
@@ -378,3 +375,14 @@ spec:
   - port: 80
   selector:
     app: dootask-okr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dootask-php
+spec:
+  ports:
+  - port: 20000
+    name: http
+  selector:
+    app: dootask-php

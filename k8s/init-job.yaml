@@ -88,8 +88,8 @@ spec:
             cp docker/php/php.conf /app/supervisor/conf.d/
             cp docker/php/php.ini /app/php/
             
-            
             # 复制Nginx配置
+            sed -i "s/php:20000/dootask-php:20000" docker/nginx/default.conf
             cp -r docker/nginx/* /app/nginx/conf.d/
             
             # 复制Office相关文件

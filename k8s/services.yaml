@@ -219,7 +219,7 @@ spec:
               name: dootask-secret
               key: DB_PASSWORD
         - name: MYSQL_Prefix
-          value: "${DB_PREFIX}approve_"
+          value: "pre_approve_"
         - name: DEMO_DATA
           value: "true"
         - name: KEY

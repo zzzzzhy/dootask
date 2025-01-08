@@ -78,13 +78,7 @@ spec:
       labels:
         app: dootask-fileview
     spec:
-      initContainers:
-      - name: wait-for-job
-        image: busybox
-        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
-        volumeMounts:
-        - name: app-data
-          mountPath: /app
+
       containers:
       - name: fileview
         image: kuaifan/fileview:4.2.0-SNAPSHOT-RC25
@@ -163,13 +157,6 @@ spec:
       labels:
         app: dootask-minder
     spec:
-      initContainers:
-      - name: wait-for-job
-        image: busybox
-        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
-        volumeMounts:
-        - name: app-data
-          mountPath: /app
       containers:
       - name: minder
         image: kuaifan/minder:0.1.3
@@ -188,13 +175,6 @@ spec:
       labels:
         app: dootask-approve
     spec:
-      initContainers:
-      - name: wait-for-job
-        image: busybox
-        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
-        volumeMounts:
-        - name: app-data
-          mountPath: /app
       containers:
       - name: approve
         image: kuaifan/dooapprove:0.1.5
@@ -253,13 +233,6 @@ spec:
       labels:
         app: dootask-ai
     spec:
-      initContainers:
-      - name: wait-for-job
-        image: busybox
-        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
-        volumeMounts:
-        - name: app-data
-          mountPath: /app
       containers:
       - name: ai
         image: kuaifan/dootask-ai:0.2.6
@@ -289,13 +262,6 @@ spec:
       labels:
         app: dootask-okr
     spec:
-      initContainers:
-      - name: wait-for-job
-        image: busybox
-        command: ['sh', '-c', 'until [ -f "/app/success" ]; do echo "waiting for init-job to complete"; sleep 2; done']
-        volumeMounts:
-        - name: app-data
-          mountPath: /app
       containers:
       - name: okr
         image: kuaifan/doookr:0.4.5

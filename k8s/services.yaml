@@ -313,7 +313,7 @@ spec:
               name: dootask-config
               key: DB_PREFIX
         - name: DEMO_DATA
-          value: "true"
+          value: true
         - name: KEY
           valueFrom:
             secretKeyRef:

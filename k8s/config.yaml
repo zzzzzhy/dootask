@@ -9,7 +9,7 @@ data:
   DB_PREFIX: "pre_"
   REDIS_HOST: "dootask-redis"
   REDIS_PORT: "6379"
-  TIMEZONE: "UTC"
+  TIMEZONE: "PRC"
 ---
 apiVersion: v1
 kind: Secret

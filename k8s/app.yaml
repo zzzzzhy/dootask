@@ -23,6 +23,10 @@ spec:
       - name: php
         image: kuaifan/php:swoole-8.0.rc18
         env:
+        - name: LANG
+          value: "C.UTF-8"
+        - name: MODE
+          value: "production"
         - name: MYSQL_HOST
           valueFrom:
             configMapKeyRef:
@@ -66,10 +70,16 @@ spec:
         - name: app-data
           mountPath: /usr/local/etc/php/php.ini
           subPath: php/php.ini
+        - name: env-config
+          mountPath: /var/www/.env
+          subPath: .env
       volumes:
       - name: app-data
         persistentVolumeClaim:
           claimName: dootask-app-pvc
+      - name: env-config
+        configMap:
+          name: dootask-env-config
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -19,6 +19,6 @@ type: Opaque
 stringData:
   DB_USERNAME: "dootask"
   DB_PASSWORD: "123456"
-  DB_ROOT_PASSWORD: "123456"
-  APP_KEY: "zzzzzz"
+  DB_ROOT_PASSWORD: "7112d618a755dc5df42058226f1670e9db90"
+  APP_KEY: "base64:8jegjH+F2Q1eBuvruKLaIs95L/DbqhlUDo62ckj/+s8="
 ---

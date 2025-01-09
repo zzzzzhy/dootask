@@ -114,7 +114,9 @@ spec:
             
             # 创建存储目录
             mkdir -p /app/www/storage/app/public
-            mkdir -p /app/www/storage/framework/{cache,sessions,views}
+            mkdir -p /app/www/storage/framework/caches
+            mkdir -p /app/www/storage/framework/sessions
+            mkdir -p /app/www/storage/framework/views
 
             
             # 设置权限

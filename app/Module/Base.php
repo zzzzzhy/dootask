@@ -14,6 +14,7 @@ use Overtrue\Pinyin\Pinyin;
 use Redirect;
 use Request;
 use Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\File;
 use Validator;
@@ -2761,7 +2762,7 @@ class Base
      * BinaryFileResponse 下载文件
      * @param File|\SplFileInfo|string $file 文件对象或路径
      * @param string|null $name 下载文件名
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return BinaryFileResponse
      */
     public static function BinaryFileResponse($file, $name = null)
     {
@@ -2797,21 +2798,62 @@ class Base
                 $encodedName = rawurlencode($name);
             }
 
-            // 创建响应对象
-            return new \Symfony\Component\HttpFoundation\BinaryFileResponse($file->getPathname(), 200, [
+            // 获取文件信息
+            $size = $file->getSize();
+            $start = 0;
+            $end = $size - 1;
+            $statusCode = 200;
+            $headers = [];
+
+            // 处理断点续传请求
+            if (isset($_SERVER['HTTP_RANGE'])) {
+                $ranges = explode('=', $_SERVER['HTTP_USER_AGENT']);
+                if (count($ranges) == 2 && str_contains($ranges[0], 'bytes')) {
+                    $positions = explode('-', $ranges[1]);
+                    $start = isset($positions[0]) && is_numeric($positions[0]) ? intval($positions[0]) : 0;
+                    $end = isset($positions[1]) && is_numeric($positions[1]) ? intval($positions[1]) : $size - 1;
+
+                    // 验证范围的有效性
+                    if ($start >= 0 && $end < $size && $start <= $end) {
+                        $statusCode = 206;
+                        $headers['Content-Range'] = sprintf('bytes %d-%d/%d', $start, $end, $size);
+                    } else {
+                        $start = 0;
+                        $end = $size - 1;
+                    }
+                }
+            }
+
+            // 计算内容长度
+            $contentLength = $end - $start + 1;
+
+            // 设置响应头
+            $headers = array_merge($headers, [
                 'Content-Type' => $file->getMimeType() ?: 'application/octet-stream',
                 'Content-Disposition' => sprintf(
                     'attachment; filename="%s"; filename*=UTF-8\'\'%s',
                     $encodedName,
                     rawurlencode($name)
                 ),
-                // 添加缓存控制和安全相关的头
-                'Cache-Control' => 'private, no-transform, no-store, must-revalidate',
+                'Content-Length' => $contentLength,
+                'Accept-Ranges' => 'bytes',
+                'Cache-Control' => 'private, no-transform, no-store, must-revalidate, max-age=0',
                 'Pragma' => 'public',
                 'Expires' => '0',
-                'Accept-Ranges' => 'bytes', // 支持断点续传
-                'X-Content-Type-Options' => 'nosniff', // 安全相关
+                'X-Content-Type-Options' => 'nosniff',
+                'ETag' => sprintf('"%s"', md5_file($file->getPathname())),
+                'Last-Modified' => gmdate('D, d M Y H:i:s', $file->getMTime()) . ' GMT'
             ]);
+
+            // 创建响应对象
+            $response = new BinaryFileResponse($file->getPathname(), $statusCode, $headers);
+
+            // 禁用输出缓冲
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            return $response;
         } catch (\Exception $e) {
             \Log::error('File download failed', [
                 'error' => $e->getMessage(),

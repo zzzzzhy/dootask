@@ -273,7 +273,7 @@ export default {
                     return
                 }
                 if (ret === 1) {
-                    resolve({data, msg})
+                    resolve({data, msg, xhr})
                 } else {
                     reject({ret, data, msg: msg || $A.L('未知错误')})
                     //
@@ -1354,9 +1354,9 @@ export default {
             dispatch("call", {
                 url: 'project/lists',
                 data: callData.get()
-            }).then(({data}) => {
+            }).then(({data, xhr}) => {
                 dispatch("saveProject", data.data);
-                callData.save(data).then(ids => dispatch("forgetProject", ids))
+                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetProject", ids))
                 state.projectTotal = data.total_all;
                 //
                 resolve(data)
@@ -1853,12 +1853,12 @@ export default {
             dispatch("call", {
                 url: 'project/task/lists',
                 data: callData.get()
-            }).then(({data}) => {
+            }).then(({data, xhr}) => {
                 if (requestData.project_id) {
                     state.projectLoad--;
                 }
                 dispatch("saveTask", data.data);
-                callData.save(data).then(ids => dispatch("forgetTask", ids))
+                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetTask", ids))
                 //
                 if (data.next_page_url) {
                     requestData.page = data.current_page + 1
@@ -2757,9 +2757,9 @@ export default {
             dispatch("call", {
                 url: 'dialog/lists',
                 data: callData.get()
-            }).then(({data}) => {
+            }).then(({data, xhr}) => {
                 dispatch("saveDialog", data.data);
-                callData.save(data).then(ids => dispatch("forgetDialog", ids))
+                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetDialog", ids))
                 //
                 if (data.current_page === 1) {
                     dispatch("getDialogLatestMsgs", data.data.map(({id}) => id))

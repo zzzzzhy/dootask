@@ -1643,7 +1643,7 @@ const timezone = require("dayjs/plugin/timezone");
                 contentType: 'application/x-www-form-urlencoded',
                 timeout: 0
             };
-            let callbacks = ['beforeSend', 'error', 'complete', 'success', 'statusCode'];
+            const callbacks = ['beforeSend', 'error', 'complete', 'success', 'statusCode'];
 
 
             //For jQuery guys
@@ -1749,7 +1749,10 @@ const timezone = require("dayjs/plugin/timezone");
             }
 
             // Create XHR
-            let xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
+
+            // 添加请求开始时间记录
+            const requestStartTime = Date.now();
 
             // Save Request URL
             xhr.requestUrl = options.url;
@@ -1827,6 +1830,22 @@ const timezone = require("dayjs/plugin/timezone");
             xhr.onload = function (e) {
                 if (xhrTimeout) clearTimeout(xhrTimeout);
                 if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 0) {
+                    // 计算请求耗时
+                    const requestDuration = Date.now() - requestStartTime;
+
+                    // 获取响应标头时间信息
+                    const serverDate = xhr.getResponseHeader('Date');
+                    const lastModified = xhr.getResponseHeader('Last-Modified');
+                    const age = xhr.getResponseHeader('Age');
+
+                    // 将时间信息添加到响应对象中
+                    xhr.timeData = {
+                        serverDate: serverDate,
+                        lastModified: lastModified,
+                        age: age,
+                        duration: requestDuration
+                    };
+
                     let responseData;
                     if (options.dataType === 'json') {
                         try {

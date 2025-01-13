@@ -15,6 +15,7 @@
 .idea
 .vscode
 .vagrant
+.windsurfrules
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

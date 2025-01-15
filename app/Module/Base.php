@@ -14,7 +14,7 @@ use Overtrue\Pinyin\Pinyin;
 use Redirect;
 use Request;
 use Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\File;
 use Validator;
@@ -2759,12 +2759,12 @@ class Base
     }
 
     /**
-     * BinaryFileResponse 下载文件
+     * DownloadFileResponse 下载文件
      * @param File|\SplFileInfo|string $file 文件对象或路径
      * @param string|null $name 下载文件名
-     * @return BinaryFileResponse
+     * @return StreamedResponse
      */
-    public static function BinaryFileResponse($file, $name = null)
+    public static function DownloadFileResponse($file, $name = null)
     {
         try {
             // 处理文件对象
@@ -2781,6 +2781,12 @@ class Base
                 throw new FileException('File must be readable and exist.');
             }
 
+            // 获取文件信息
+            $size = $file->getSize();
+            if ($size === false || $size < 0) {
+                throw new FileException('Unable to determine file size.');
+            }
+
             // 处理文件名
             if (empty($name)) {
                 $name = basename($file->getPathname());
@@ -2792,31 +2798,28 @@ class Base
             $name = Base::cutStr($name, 180);
             $name = str_replace(['"', '<', '>', '|', '/', '\\', '?', ':'], '', $name);
 
-            // IE 浏览器特殊处理
-            $encodedName = $name;
-            if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/MSIE|Internet Explorer|Trident/i", $_SERVER['HTTP_USER_AGENT'])) {
-                $encodedName = rawurlencode($name);
+            // 获取MIME类型
+            $mimeType = $file->getMimeType();
+            if (empty($mimeType)) {
+                $mimeType = 'application/octet-stream';
             }
 
-            // 获取文件信息
-            $size = $file->getSize();
+            // 处理 Range 请求
             $start = 0;
             $end = $size - 1;
-            $statusCode = 200;
-            $headers = [];
+            $length = $size;
+            $isRangeRequest = false;
 
-            // 处理断点续传请求
             if (isset($_SERVER['HTTP_RANGE'])) {
-                $ranges = explode('=', $_SERVER['HTTP_USER_AGENT']);
-                if (count($ranges) == 2 && str_contains($ranges[0], 'bytes')) {
-                    $positions = explode('-', $ranges[1]);
-                    $start = isset($positions[0]) && is_numeric($positions[0]) ? intval($positions[0]) : 0;
-                    $end = isset($positions[1]) && is_numeric($positions[1]) ? intval($positions[1]) : $size - 1;
+                $range = str_replace('bytes=', '', $_SERVER['HTTP_RANGE']);
+                if (preg_match('/^(\d+)-(\d*)$/', $range, $matches)) {
+                    $start = intval($matches[1]);
+                    $end = !empty($matches[2]) ? intval($matches[2]) : $size - 1;
 
                     // 验证范围的有效性
                     if ($start >= 0 && $end < $size && $start <= $end) {
-                        $statusCode = 206;
-                        $headers['Content-Range'] = sprintf('bytes %d-%d/%d', $start, $end, $size);
+                        $length = $end - $start + 1;
+                        $isRangeRequest = true;
                     } else {
                         $start = 0;
                         $end = $size - 1;
@@ -2824,43 +2827,69 @@ class Base
                 }
             }
 
-            // 计算内容长度
-            $contentLength = $end - $start + 1;
-
-            // 设置响应头
-            $headers = array_merge($headers, [
-                'Content-Type' => $file->getMimeType() ?: 'application/octet-stream',
+            // 设置基本响应头
+            $headers = [
+                'Content-Type' => $mimeType,
                 'Content-Disposition' => sprintf(
                     'attachment; filename="%s"; filename*=UTF-8\'\'%s',
-                    $encodedName,
+                    $name,
                     rawurlencode($name)
                 ),
-                'Content-Length' => $contentLength,
                 'Accept-Ranges' => 'bytes',
                 'Cache-Control' => 'private, no-transform, no-store, must-revalidate, max-age=0',
-                'Pragma' => 'public',
-                'Expires' => '0',
-                'X-Content-Type-Options' => 'nosniff',
-                'ETag' => sprintf('"%s"', md5_file($file->getPathname())),
-                'Last-Modified' => gmdate('D, d M Y H:i:s', $file->getMTime()) . ' GMT'
-            ]);
+                'Content-Length' => $length,
+                'Last-Modified' => gmdate('D, d M Y H:i:s', $file->getMTime()) . ' GMT',
+                'ETag' => sprintf('"%s"', md5_file($file->getPathname()))
+            ];
 
-            // 创建响应对象
-            $response = new BinaryFileResponse($file->getPathname(), $statusCode, $headers);
-
-            // 禁用输出缓冲
-            if (ob_get_level()) {
-                ob_end_clean();
+            if ($isRangeRequest) {
+                $headers['Content-Range'] = "bytes {$start}-{$end}/{$size}";
+                $statusCode = 206;
+            } else {
+                $statusCode = 200;
             }
 
-            return $response;
+            // 创建流式响应
+            return new StreamedResponse(
+                function () use ($file, $start, $length) {
+                    $handle = fopen($file->getPathname(), 'rb');
+                    if ($handle === false) {
+                        throw new FileException('Cannot open file for reading');
+                    }
+
+                    if (fseek($handle, $start) === -1) {
+                        fclose($handle);
+                        throw new FileException('Cannot seek to position ' . $start);
+                    }
+
+                    $remaining = $length;
+                    $bufferSize = 8192; // 8KB chunks
+
+                    while ($remaining > 0 && !feof($handle)) {
+                        $readSize = min($bufferSize, $remaining);
+                        $buffer = fread($handle, $readSize);
+                        if ($buffer === false) {
+                            break;
+                        }
+                        echo $buffer;
+                        flush();
+                        $remaining -= strlen($buffer);
+                    }
+
+                    fclose($handle);
+                },
+                $statusCode,
+                $headers
+            );
         } catch (\Exception $e) {
             \Log::error('File download failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'file' => $file->getPathname() ?? null,
                 'name' => $name ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null, // 添加更多调试信息
-                'ip' => request()->ip()
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                'ip' => request()->ip(),
+                'range' => $_SERVER['HTTP_RANGE'] ?? null
             ]);
             abort(403, 'File download failed');
         }

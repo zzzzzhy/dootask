@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Module\Base;
 use App\Module\Timer;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * App\Models\FileContent
@@ -104,10 +105,10 @@ class FileContent extends AbstractModel
 
     /**
      * 获取格式内容（或下载）
-     * @param File $file
+     * @param $file
      * @param $content
      * @param $download
-     * @return array|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return array|StreamedResponse
      */
     public static function formatContent($file, $content, $download = false)
     {
@@ -119,7 +120,7 @@ class FileContent extends AbstractModel
             } else {
                 $filePath = public_path($content['url']);
             }
-            return Base::BinaryFileResponse($filePath, $name);
+            return Base::DownloadFileResponse($filePath, $name);
         }
         if (empty($content)) {
             $content = match ($file->type) {
@@ -148,7 +149,7 @@ class FileContent extends AbstractModel
             if ($download) {
                 $filePath = public_path($path);
                 if (isset($filePath)) {
-                    return Base::BinaryFileResponse($filePath, $name);
+                    return Base::DownloadFileResponse($filePath, $name);
                 } else {
                     abort(403, "This file not support download.");
                 }

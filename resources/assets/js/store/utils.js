@@ -14,6 +14,7 @@ function __callData(key, requestData, state) {
         'timerange',
     ])).toString())
     const callData = state.callAt.find(item => item.key === callKey) || {}
+    callData.__last = $A.dayjs().unix()
     if (typeof callData.key === "undefined") {
         callData.key = callKey
         callData.updated = 0
@@ -34,16 +35,15 @@ function __callData(key, requestData, state) {
      * @param total
      * @param current_page
      * @param deleted_id
-     * @param serverDate
      * @returns {Promise<unknown>}
      */
-    this.save = ({total, current_page, deleted_id}, serverDate = undefined) => {
+    this.save = ({total, current_page, deleted_id}) => {
         return new Promise(async resolve => {
             if (current_page !== 1) {
                 return
             }
             let hasUpdate = false
-            const time = $A.dayjs(serverDate).unix()
+            const time = callData.__last || $A.dayjs().unix()
             if (total > 0) {
                 callData.updated = time
                 hasUpdate = true

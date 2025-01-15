@@ -1354,9 +1354,9 @@ export default {
             dispatch("call", {
                 url: 'project/lists',
                 data: callData.get()
-            }).then(({data, xhr}) => {
+            }).then(({data}) => {
                 dispatch("saveProject", data.data);
-                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetProject", ids))
+                callData.save(data).then(ids => dispatch("forgetProject", ids))
                 state.projectTotal = data.total_all;
                 //
                 resolve(data)
@@ -1853,12 +1853,12 @@ export default {
             dispatch("call", {
                 url: 'project/task/lists',
                 data: callData.get()
-            }).then(({data, xhr}) => {
+            }).then(({data}) => {
                 if (requestData.project_id) {
                     state.projectLoad--;
                 }
                 dispatch("saveTask", data.data);
-                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetTask", ids))
+                callData.save(data).then(ids => dispatch("forgetTask", ids))
                 //
                 if (data.next_page_url) {
                     requestData.page = data.current_page + 1
@@ -2757,9 +2757,9 @@ export default {
             dispatch("call", {
                 url: 'dialog/lists',
                 data: callData.get()
-            }).then(({data, xhr}) => {
+            }).then(({data}) => {
                 dispatch("saveDialog", data.data);
-                callData.save(data, xhr.timeData.serverDate).then(ids => dispatch("forgetDialog", ids))
+                callData.save(data).then(ids => dispatch("forgetDialog", ids))
                 //
                 if (data.current_page === 1) {
                     dispatch("getDialogLatestMsgs", data.data.map(({id}) => id))

@@ -191,6 +191,7 @@ upgrade_cert(){
 }
 
 check_expire(){
+    apk add --no-cache openssl socat
     find ${SSL_PATH} -type f -name "*.key" | while read -r file; do
         CERT_PATH=$file
         expiry_date=$(openssl x509 -enddate -noout -in "$CERT_PATH" | cut -d= -f2)

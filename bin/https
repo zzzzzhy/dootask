@@ -142,6 +142,7 @@ install() {
         if /root/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath "${sslPath}/${domain}.crt" --keypath "${sslPath}/${domain}.key" --ecc --force; then
             success "SSL 证书配置成功"
             sleep 2
+            cp -r /root/.acme.sh/${domain}_ecc/*.conf ${sslPath}/
         fi
     else
         error "SSL 证书生成失败"
@@ -150,7 +151,7 @@ install() {
     fi
 
     env_set "APP_URL" "https://${domain}"
-
+    
     cat >${sitePath}/ssl.conf <<EOF
 server_name ${domain};
 listen 443 ssl;

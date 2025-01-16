@@ -326,6 +326,17 @@ https_auto() {
     if [[ 0 -eq $? ]]; then
         run_exec nginx "nginx -s reload"
     fi
+    new_job="* 6 * * * bash $(pwd)/bin/check_cert.sh $(pwd) $(env_get APP_ID)"
+    current_crontab=$(crontab -l 2>/dev/null)
+    if echo "$current_crontab" | grep -v "$new_job"; then
+        echo "任务已存在，无需添加。"
+    else
+        crontab -l |{
+            cat
+            echo "$new_job"
+        } | crontab -
+        echo "任务已添加。"
+    fi
 }
 
 env_get() {

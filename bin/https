@@ -142,6 +142,7 @@ install() {
         if /root/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath "${sslPath}/${domain}.crt" --keypath "${sslPath}/${domain}.key" --ecc --force; then
             success "SSL 证书配置成功"
             sleep 2
+            cp -r /root/.acme.sh/${domain}_ecc/*.conf ${sslPath}/
         fi
     else
         error "SSL 证书生成失败"
@@ -165,5 +166,53 @@ error_page 497  https://\$host\$request_uri;
 EOF
 }
 
-check
-install
+UPDATE_LOG="$(dirname "$PWD")/docker/nginx/site/ssl/update.log"
+SSL_PATH="$(dirname "$PWD")/docker/nginx/site/ssl"
+upgrade_cert(){
+    curl https://get.acme.sh | sh
+    if [[ 0 -ne $? ]]; then
+        echo "安装证书更新脚本失败"
+        echo $(date)":   安装证书更新脚本失败" >> ${UPDATE_LOG}
+        exit 1
+    fi
+    file=$1
+    domain=$(basename "$file" .key)
+    old_crt_md5=$(md5sum ${SSL_PATH}/${domain}.crt| awk '{print $1}')
+    /root/.acme.sh/acme.sh --renew --standalone -d ${domain} --fullchainpath "${SSL_PATH}/${domain}.crt" --keypath "${SSL_PATH}/${domain}.key" --ecc --force
+    new_crt_md5=$(md5sum ${SSL_PATH}/${domain}.crt| awk '{print $1}')
+    if [ "${old_key_md5}" == "${new_key_md5}" ]; then
+        echo "${domain} 证书更新脚本失败"
+        echo $(date)":   ${domain} 证书更新失败" >> ${UPDATE_LOG}
+        echo $(date)":   ${old_crt_md5} == ${new_crt_md5}" >> ${UPDATE_LOG}
+    else
+        echo "${domain} 证书更新脚本成功"
+        echo $(date)":   ${domain} 证书更新成功" >> ${UPDATE_LOG}
+    fi
+}
+
+check_expire(){
+    find ${SSL_PATH} -type f -name "*.key" | while read -r file; do
+        CERT_PATH=$file
+        expiry_date=$(openssl x509 -enddate -noout -in "$CERT_PATH" | cut -d= -f2)
+        expiry_timestamp=$(date -d "$expiry_date" +%s)
+        current_timestamp=$(date +%s)
+        days_remaining=$(( (expiry_timestamp - current_timestamp) / 86400 ))
+        echo "剩余时间${days_remaining}天" >> ${UPDATE_LOG}
+        if [ "$days_remaining" -lt 30 ]; then
+            upgrade_cert $file
+        fi
+    done
+}
+case "${1}" in
+"install")
+    check
+    install
+    ;;
+"renew")
+    check_expire
+    ;;
+*)
+    echo "test"
+    ;;
+esac
+

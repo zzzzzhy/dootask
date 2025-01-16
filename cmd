@@ -322,9 +322,20 @@ https_auto() {
     if [[ "$restart_nginx" == "y" ]]; then
         $COMPOSE up -d
     fi
-    docker run -it --rm -v $(pwd):/work nginx:alpine sh "/work/bin/https"
+    docker run -it --rm -v $(pwd):/work nginx:alpine sh /work/bin/https install
     if [[ 0 -eq $? ]]; then
         run_exec nginx "nginx -s reload"
+    fi
+    new_job="* 6 * * * docker run -it --rm -v $(pwd):/work nginx:alpine sh /work/bin/https renew"
+    current_crontab=$(crontab -l 2>/dev/null)
+    if echo "$current_crontab" | grep -v "https renew"; then
+        echo "任务已存在，无需添加。"
+    else
+        crontab -l |{
+            cat
+            echo "$new_job"
+        } | crontab -
+        echo "任务已添加。"
     fi
 }
 

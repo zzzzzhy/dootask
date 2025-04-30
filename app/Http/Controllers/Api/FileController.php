@@ -633,7 +633,11 @@ class FileController extends AbstractController
         User::auth();
         //
         $config = Request::input('config');
-        $token = \Firebase\JWT\JWT::encode($config, env('OFFICE_JWT') ,'HS256');
+        if env('OFFICE_JWT') === null {
+            $token = \Firebase\JWT\JWT::encode($config, env('APP_KEY') ,'HS256');
+        } else {
+            $token = \Firebase\JWT\JWT::encode($config, env('OFFICE_JWT') ,'HS256');
+        }
         return Base::retSuccess('成功', [
             'token' => $token
         ]);

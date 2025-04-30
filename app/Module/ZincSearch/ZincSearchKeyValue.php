@@ -28,7 +28,8 @@ class ZincSearchKeyValue
     /**
      * 索引名称
      */
-    protected static string $indexName = 'keyValue';
+    // protected static string $indexName = 'keyValue';
+    protected const $indexName = 'keyValue_' . env("APP_ID");
 
     // ==============================
     // 基础方法

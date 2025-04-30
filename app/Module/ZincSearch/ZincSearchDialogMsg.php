@@ -30,8 +30,10 @@ class ZincSearchDialogMsg
     /**
      * 索引名称
      */
-    protected static string $indexNameMsg = 'dialogMsg';
-    protected static string $indexNameUser = 'dialogUser';
+    // protected static string $indexNameMsg = 'dialogMsg';
+    // protected static string $indexNameUser = 'dialogUser';
+    protected const $indexNameMsg = 'dialogMsg_' . env("APP_ID");
+    protected const $indexNameUser = 'dialogUser_' . env("APP_ID");
 
     // ==============================
     // 基础方法

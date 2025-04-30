@@ -20,7 +20,7 @@ class ZincSearchBase
         $this->host = env('ZINCSEARCH_HOST', 'search');
         $this->port = env('ZINCSEARCH_PORT', '4080');
         $this->user = env('DB_USERNAME', '');
-        $this->pass = env('DB_PASSWORD', '');
+        $this->pass = env('ZINCSEARCH_PASSWORD', '');
     }
 
     /**
